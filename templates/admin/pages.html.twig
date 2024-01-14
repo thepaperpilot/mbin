@@ -52,6 +52,24 @@
                     {{ 'privacy_policy'|trans }}
                 </a>
             </li>
+            <li>
+                <a href="{{ path('admin_pages', {page: 'forgejo'}) }}"
+                   class="{{ html_classes({'active': route_has_param('page', 'forgejo_pages')}) }}">
+                    {{ 'Forgejo' }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_pages', {page: 'matrix'}) }}"
+                   class="{{ html_classes({'active': route_has_param('page', 'matrix')}) }}">
+                    {{ 'Matrix' }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_pages', {page: 'pages'}) }}"
+                   class="{{ html_classes({'active': route_has_param('page', 'pages')}) }}">
+                    {{ 'Pages Server' }}
+                </a>
+            </li>
         </menu>
     </div>
     <div class="section" id="content">

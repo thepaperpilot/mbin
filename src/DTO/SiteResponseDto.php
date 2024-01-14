@@ -16,6 +16,9 @@ class SiteResponseDto implements \JsonSerializable
         'faq',
         'privacyPolicy',
         'terms',
+        'forgejo',
+        'matrix',
+        'pages',
     ];
 
     public ?string $about = null;
@@ -23,6 +26,9 @@ class SiteResponseDto implements \JsonSerializable
     public ?string $faq = null;
     public ?string $privacyPolicy = null;
     public ?string $terms = null;
+    public ?string $forgejo = null;
+    public ?string $matrix = null;
+    public ?string $pages = null;
 
     public function __construct(?Site $site)
     {
@@ -31,6 +37,9 @@ class SiteResponseDto implements \JsonSerializable
         $this->faq = $site?->faq;
         $this->about = $site?->about;
         $this->contact = $site?->contact;
+        $this->forgejo = $site?->forgejo;
+        $this->matrix = $site?->matrix;
+        $this->pages = $site?->pages;
     }
 
     public function jsonSerialize(): mixed
@@ -41,6 +50,9 @@ class SiteResponseDto implements \JsonSerializable
             'faq' => $this->faq,
             'privacyPolicy' => $this->privacyPolicy,
             'terms' => $this->terms,
+            'forgejo' => $this->forgejo,
+            'matrix' => $this->matrix,
+            'pages' => $this->pages,
         ];
     }
 }

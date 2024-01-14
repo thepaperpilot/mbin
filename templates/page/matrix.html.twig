@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{%- block title -%}
+    {{- 'Matrix' }} - {{ parent() -}}
+{%- endblock -%}
+
+{% block mainClass %}page-matrix{% endblock %}
+
+{% block header_nav %}
+{% endblock %}
+
+{% block sidebar_top %}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ 'Matrix' }}</h1>
+    <div id="content" class="section">
+        {{ body|markdown|raw }}
+    </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{%- block title -%}
+    {{- 'Pages' }} - {{ parent() -}}
+{%- endblock -%}
+
+{% block mainClass %}page-pages{% endblock %}
+
+{% block header_nav %}
+{% endblock %}
+
+{% block sidebar_top %}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ 'Pages Server' }}</h1>
+    <div id="content" class="section">
+        {{ body|markdown|raw }}
+    </div>
+{% endblock %}

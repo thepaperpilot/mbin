@@ -44,6 +44,8 @@
         </script>
     {% endblock %}
 
+    <script defer data-domain="incremental.social" src="https://plausible.io/js/script.js"></script>
+
     {% if not app.user or not app.user.ignoreMagazinesCustomCss %}
         {% if magazine is defined and magazine %}
             <style>
