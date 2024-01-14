@@ -75,11 +75,6 @@
     </div>
     {% if not app.user and (is_route_name_contains('front') or is_route_name('root')  or is_route_name('magazine_list_all')) %}
         <div class="section intro">
-            <div class="container">
-                <h3>{{ 'kbin_intro_title'|trans }}</h3>
-                <p>{{ kbin_title() }} {{ 'kbin_intro_desc'|trans }}</p>
-            </div>
-
             <div>
                 <a href="{{ path('entry_create') }}" class="btn btn-link btn__primary"
                    type="submit">{{ 'add_new_link'|trans }}</a>
@@ -180,13 +175,3 @@
         </ul>
     </div>
 </section>
-<div class="section section--no-bg kbin-promo">
-    <img height="47" src="{{ asset('favicon.svg') }}" alt="Clone repo">
-    <div>
-        <h4>{{ 'kbin_promo_title'|trans }}</h4>
-        <p>{{ 'kbin_promo_desc'|trans({
-                '%link_start%': '<a href="https://github.com/MbinOrg/mbin" class="stretched-link">',
-                '%link_end%': '</a>'
-            })|raw }}</p>
-    </div>
-</div>

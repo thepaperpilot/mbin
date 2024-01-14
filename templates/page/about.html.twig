@@ -13,7 +13,17 @@
 {% endblock %}
 
 {% block body %}
-    <h1>{{ 'about_instance'|trans }}</h1>
+    <div style="position: relative; z-index: 1; height: 35vmin; margin-top: -80px; pointer-events: none;">
+        <div style="font-size: 30vmin; position: absolute; z-index: -2; left: 50%; transform: translateX(-50%) rotateZ(10deg); white-space: nowrap;">
+            <div style="position: absolute; z-index: -1; top: 0; left: 0; right: 0; bottom: 0; filter: blur(72px); -webkit-background-clip: text; background-clip: text;">
+                +1&#128100;
+            </div>
+            +1&#128100;
+        </div>
+    </div>
+    <div style="width: 50%; font-size: xx-large; margin: 2em 0">
+        Connect with your fellow incremental games developers and enjoyers!
+    </div>
     <div id="content" class="section">
         {{ body|markdown|raw }}
     </div>
