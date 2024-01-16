@@ -368,9 +368,10 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
             ->andWhere('m.visibility = :visibility')
             ->andWhere('u.visibility = :visibility')
             ->andWhere('m.isAdult = false');
-        if ($this->settingsManager->get('KBIN_SIDEBAR_SECTIONS_LOCAL_ONLY')) {
+        if ($this->settingsManager->get('MBIN_SIDEBAR_SECTIONS_LOCAL_ONLY')) {
             $qb = $qb->andWhere('m.apId IS NULL');
         }
+
         return $qb->join('e.magazine', 'm')
             ->join('e.user', 'u')
             ->orderBy('e.createdAt', 'DESC')
