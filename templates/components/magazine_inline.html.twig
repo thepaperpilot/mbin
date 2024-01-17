@@ -9,7 +9,9 @@
              src="{{ asset(magazine.icon.filePath) | imagine_filter('avatar_thumb') }}"
              alt="{{ magazine.name ~ ' ' ~ 'icon'|trans|lower }}">
     {% endif %}
-    {% if fullName %}
+    {% if showTitle %}
+        {{ magazine.title }} {% if magazine.isAdult %}<small class="badge danger">18+</small>{% endif %}
+    {% elseif fullName %}
         {{ magazine.name }} {% if magazine.isAdult %}<small class="badge danger">18+</small>{% endif %}
     {% else %}
         {{ ('@'~magazine.name)|username(false) -}}

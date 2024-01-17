@@ -15,7 +15,7 @@
                         <a href="{{ entry_url(entry) }}" class="stretched-link more">{{ 'show_more'|trans }}</a>
                     </div>
                     <figcaption>
-                        {{ component('date', {date: entry.createdAt}) }} {{ 'to'|trans }} {{ component('magazine_inline', {magazine: entry.magazine}) }}
+                        {{ component('date', {date: entry.createdAt}) }} {{ 'to'|trans }} {{ component('magazine_inline', {magazine: entry.magazine, showTitle: true}) }}
                     </figcaption>
                 </figure>
             {% endfor %}
