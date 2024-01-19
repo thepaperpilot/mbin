@@ -1,7 +1,7 @@
 #header {
   align-items: end;
-  background: var(--kbin-header-bg);
-  color: var(--kbin-header-text-color);
+  background: #2E3440;
+  color: #ECEFF4;
   font-size: .85rem;
   position: relative;
   z-index: 10;
@@ -126,10 +126,10 @@
   }
 
   a {
-    color: var(--kbin-header-link-color);
+    color: #88C0D0;
 
     &:hover {
-      color: var(--kbin-header-link-hover-color);
+      color: #88C0D0;
     }
   }
 
@@ -174,12 +174,12 @@
     }
 
     li a:hover {
-      border-bottom: var(--kbin-header-hover-border);
+      border-bottom: 3px solid #ECEFF4;
 
     }
 
     li .active {
-      border-bottom: var(--kbin-header-hover-border);
+      border-bottom: 3px solid #ECEFF4;
     }
 
     .magazine {
@@ -188,7 +188,7 @@
       padding-top: .2rem;
 
       span {
-        color: var(--kbin-header-text-color);
+        color: #ECEFF4;
         font-weight: 100;
         opacity: .75;
       }
@@ -300,7 +300,7 @@
     }
 
     @include media-breakpoint-down(lg) {
-      color: var(--kbin-meta-text-color);
+      color: #D8DEE9;
 
       span {
         padding-left: 1rem;
@@ -325,7 +325,7 @@
     @include media-breakpoint-up(lg) {
 
       li a.active {
-        background: var(--kbin-header-link-active-bg);
+        background: #4C566A;
       }
     }
   }
