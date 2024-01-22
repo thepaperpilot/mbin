@@ -2,15 +2,6 @@
     <div class="section options--top options top-options">
         <menu>
             <ul data-options-target="actions">
-                <li class='close-button'>
-                    <a
-                            href=""
-                            data-action="options#closeMobileSidebar:prevent"
-                            title="{{ 'close'|trans }}"
-                            aria-label="{{ 'close'|trans }}">
-                        <i class="fa-solid fa-close" aria-hidden="true"></i>
-                    </a>
-                </li>
                 <li class='federation-button'>
                     <a
                     href="#federation"
@@ -29,14 +20,6 @@
                     title="{{ 'settings'|trans }}"
                     aria-label="{{ 'settings'|trans }}">
                         <i class="fa-solid fa-gear" aria-hidden="true"></i>
-                    </a>
-                </li>
-                <li class='home-button'>
-                    <a
-                            href="/"
-                            title="{{ 'homepage'|trans }}"
-                            aria-label="{{ 'homepage'|trans }}">
-                        <i class="fa-solid fa-home" aria-hidden="true"></i>
                     </a>
                 </li>
             </ul>
@@ -66,12 +49,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="section mobile-nav">
-        {% include 'layout/_header_bread.html.twig' %}
-        <menu class="info">
-            {% include 'layout/_header_nav.html.twig' with {header_nav: header_nav} %}
-        </menu>
     </div>
     {% if not app.user and (is_route_name_contains('front') or is_route_name('root')  or is_route_name('magazine_list_all')) %}
         <div class="section intro">

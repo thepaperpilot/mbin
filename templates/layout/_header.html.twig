@@ -10,9 +10,24 @@
             <a href="{{ path('search') }}">{{ 'go_to_search'|trans }}</a>
         </div>
         <nav class="head-nav">
+            <menu class="head-nav-mobile__menu">
+                <li class="dropdown">
+                    <div
+                    class="icon"
+                    aria-label="{{ 'menu'|trans }}"
+                    title="{{ 'menu'|trans }}">
+                        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                    </div>
+                    <ul class="dropdown__menu">
+                        <li>
+                            {% include 'layout/_header_bread.html.twig' %}
+                        </li>
+                        {% include 'layout/_header_nav.html.twig' %}
+                    </ul>
+                </li>
+            </menu>
             <div class="brand">
-                <div id="nav-toggle" data-action="click->kbin#handleNavToggleClick" aria-label="{{ 'menu'|trans }}"><i class="fa-solid fa-bars" aria-hidden="true"></i></div>
-                <a href="/">
+                <a href="/" class="{{ html_classes({'active': (is_route_name('posts_front') or is_route_name_contains('posts') or post is defined)  and not is_route_name_contains('user') }) }}">
                     {% if kbin_header_logo() %}
                         <img id="logo" src="{{ asset('mbin_logo.svg') }}" alt="{{ 'homepage'|trans }}" title="{{ 'homepage'|trans}}">
                     {% else %}

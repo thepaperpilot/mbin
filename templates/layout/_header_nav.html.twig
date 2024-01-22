@@ -1,13 +1,13 @@
 {% if header_nav is empty %}
     <li>
         <a href="{{ navbar_threads_url(magazine ?? null) }}"
-           class="{{ html_classes({'active': not is_route_name_contains('user_') and (is_route_name_starts_with('front') or is_route_name('root') or is_route_name_contains('_entries') or entry is defined and entry)}) }}">
+        class="{{ html_classes({'active': not is_route_name_contains('user_') and (is_route_name_starts_with('front') or is_route_name('root') or is_route_name_contains('_entries') or entry is defined and entry)}) }}">
             {{ 'threads'|trans }} {% if magazine is defined and magazine %}({{ magazine.entryCount }}){% endif %}
         </a>
     </li>
     <li>
         <a href="{{ navbar_posts_url(magazine ?? null) }}"
-           class="{{ html_classes({'active': (is_route_name('posts_front') or is_route_name_contains('posts') or post is defined)  and not is_route_name_contains('user') }) }}">
+        class="{{ html_classes({'active': (is_route_name('posts_front') or is_route_name_contains('posts') or post is defined)  and not is_route_name_contains('user') }) }}">
             {{ 'microblog'|trans }} {% if magazine is defined and magazine %}({{ magazine.postCount }}){% endif %}
         </a>
     </li>
