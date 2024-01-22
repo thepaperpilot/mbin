@@ -166,6 +166,7 @@
 
         &> a {
           min-width: 3rem;
+          border-bottom: solid 3px transparent;
         }
       }
   
@@ -174,7 +175,6 @@
         align-items: center;
         height: 100%;
         display: flex !important;
-        border-bottom: solid 3px transparent;
         white-space: nowrap;
   
         @include media-breakpoint-down(sm) {
