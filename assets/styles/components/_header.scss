@@ -401,5 +401,9 @@
     li:hover a::before {
       border-bottom: solid 3px #ECEFF4;
     }
+
+    li a.active {
+      background: #4C566A;
+    }
   }
 }
