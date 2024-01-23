@@ -45,8 +45,12 @@
     border-bottom-right-radius: 0 !important;
   }
 
-  .dropdown__menu a:hover {
-    background: #3B4252 !important;
+  .dropdown__menu a {
+    font-weight: 400 !important;
+
+    &:hover {
+      background: #3B4252 !important;
+    }
   }
 
   menu {
@@ -375,7 +379,6 @@
 
       li a {
         border-bottom-color: transparent !important;
-        font-weight: 400 !important;
       }
     }
   }
