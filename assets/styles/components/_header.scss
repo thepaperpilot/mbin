@@ -361,6 +361,13 @@
       align-items: center;
       display: flex;
       border-bottom: 3px solid transparent;
+      justify-content: center;
+      color: #88C0D0;
+      
+      @include media-breakpoint-down(lg) {
+        padding: 3px 0 0;
+        min-width: 2.5rem;
+      }
     }
 
     .dropdown:hover .icon {
