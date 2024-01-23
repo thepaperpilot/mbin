@@ -40,11 +40,6 @@
     }
   }
 
-  .dropdown:last-child:not(:first-child) .dropdown__menu {
-    border-right: none;
-    border-bottom-right-radius: 0 !important;
-  }
-
   .dropdown__menu a {
     font-weight: 400 !important;
 
@@ -374,8 +369,6 @@
     .dropdown__menu {
       right: unset !important;
       left: 0 !important;
-      border-left: none;
-      border-bottom-left-radius: 0 !important;
 
       li a {
         border-bottom-color: transparent !important;
