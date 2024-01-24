@@ -137,6 +137,10 @@
                         <a href="{{ path('front') }}"
                            class="{{ html_classes({'active': is_route_name('front') or is_route_name('posts_front') or is_route_name('people_front')}) }}">{{ 'all'|trans }}</a>
                     </li>
+                    <li>
+                        <a href="{{ path('magazine_list_all') }}"
+                           class="{{ html_classes({'active': is_route_name('magazine_list_all')}) }}">{{ 'magazines'|trans }}</a>
+                    </li>
                 </ul>
             </li>
             {% if app.user %}
