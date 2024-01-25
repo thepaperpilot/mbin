@@ -35,7 +35,7 @@ class Zitadel extends AbstractProvider
 
     public function getBaseAuthorizationUrl()
     {
-        return $this->getBaseUrl().'oauth/v2/authorize';
+        return $this->getBaseUrl().'oauth/v2/authorize?prompt=select_account';
     }
 
     public function getBaseAccessTokenUrl(array $params)
