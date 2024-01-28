@@ -139,4 +139,8 @@
       border-radius: .5rem !important;
     }
   }
+
+  .page-stats #content {
+    background: var(--kbin-blockquote-color);
+  }
 }
