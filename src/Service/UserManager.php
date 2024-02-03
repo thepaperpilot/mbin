@@ -137,13 +137,6 @@ readonly class UserManager
 
     public function create(UserDto $dto, bool $verifyUserEmail = true, $rateLimit = true): User
     {
-        if ($rateLimit) {
-            $limiter = $this->userRegisterLimiter->create($dto->ip);
-            if (false === $limiter->consume()->isAccepted()) {
-                throw new TooManyRequestsHttpException();
-            }
-        }
-
         $user = new User($dto->email, $dto->username, '', ($dto->isBot) ? 'Service' : 'Person', $dto->apProfileId, $dto->apId);
         $user->setPassword($this->passwordHasher->hashPassword($user, $dto->plainPassword));
 

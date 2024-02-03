@@ -57,13 +57,6 @@ class EntryManager implements ContentManagerInterface
 
     public function create(EntryDto $dto, User $user, bool $rateLimit = true): Entry
     {
-        if ($rateLimit) {
-            $limiter = $this->entryLimiter->create($dto->ip);
-            if (false === $limiter->consume()->isAccepted()) {
-                throw new TooManyRequestsHttpException();
-            }
-        }
-
         if ($dto->magazine->isBanned($user) || $user->isBanned()) {
             throw new UserBannedException();
         }

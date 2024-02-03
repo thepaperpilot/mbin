@@ -24,11 +24,6 @@ class ContactManager
 
     public function send(ContactDto $dto)
     {
-        $limiter = $this->contactLimiter->create($dto->ip);
-        if (false === $limiter->consume()->isAccepted()) {
-            throw new TooManyRequestsHttpException();
-        }
-
         $email = (new TemplatedEmail())
             ->from(new Address($this->settings->get('KBIN_SENDER_EMAIL'), $this->settings->get('KBIN_DOMAIN')))
             ->to($this->settings->get('KBIN_CONTACT_EMAIL'))

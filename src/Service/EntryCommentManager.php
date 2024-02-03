@@ -43,13 +43,6 @@ class EntryCommentManager implements ContentManagerInterface
 
     public function create(EntryCommentDto $dto, User $user, $rateLimit = true): EntryComment
     {
-        if ($rateLimit) {
-            $limiter = $this->entryCommentLimiter->create($dto->ip);
-            if ($limiter && false === $limiter->consume()->isAccepted()) {
-                throw new TooManyRequestsHttpException();
-            }
-        }
-
         if ($dto->entry->magazine->isBanned($user) || $user->isBanned()) {
             throw new UserBannedException();
         }

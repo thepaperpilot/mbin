@@ -54,13 +54,6 @@ class MagazineManager
 
     public function create(MagazineDto $dto, User $user, bool $rateLimit = true): Magazine
     {
-        if ($rateLimit) {
-            $limiter = $this->magazineLimiter->create($dto->ip);
-            if (false === $limiter->consume()->isAccepted()) {
-                throw new TooManyRequestsHttpException();
-            }
-        }
-
         $magazine = $this->factory->createFromDto($dto, $user);
         $magazine->apId = $dto->apId;
         $magazine->apProfileId = $dto->apProfileId;

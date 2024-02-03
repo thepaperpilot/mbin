@@ -102,11 +102,8 @@ class BaseApi extends AbstractController
             $limiterFactory && $this->isGranted('ROLE_USER')
         ) {
             $limiter = $limiterFactory->create($this->getUserOrThrow()->getUserIdentifier());
-        } elseif ($anonLimiterFactory) {
-            $limiter = $anonLimiterFactory->create($this->ipResolver->resolve());
         } else {
-            // non-API_USER without an anonymous rate limiter? Not allowed.
-            throw new AccessDeniedHttpException();
+            return [];
         }
         $limit = $limiter->consume();
 

@@ -29,11 +29,6 @@ class UserDeleteRequestController extends AbstractController
 
         $this->validateCsrf('user_delete', $request->request->get('token'));
 
-        $limiter = $this->userDeleteLimiter->create($this->ipResolver->resolve());
-        if (false === $limiter->consume()->isAccepted()) {
-            throw new TooManyRequestsHttpException();
-        }
-
         $this->userManager->deleteRequest($this->getUserOrThrow());
 
         $this->addFlash('success', 'delete_account_request_send');
@@ -47,11 +42,6 @@ class UserDeleteRequestController extends AbstractController
         $this->denyAccessUnlessGranted('edit_profile', $this->getUserOrThrow());
 
         $this->validateCsrf('user_delete', $request->request->get('token'));
-
-        $limiter = $this->userDeleteLimiter->create($this->ipResolver->resolve());
-        if (false === $limiter->consume()->isAccepted()) {
-            throw new TooManyRequestsHttpException();
-        }
 
         $this->userManager->revokeDeleteRequest($this->getUserOrThrow());
 

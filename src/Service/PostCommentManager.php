@@ -43,13 +43,6 @@ class PostCommentManager implements ContentManagerInterface
 
     public function create(PostCommentDto $dto, User $user, $rateLimit = true): PostComment
     {
-        if ($rateLimit) {
-            $limiter = $this->postCommentLimiter->create($dto->ip);
-            if ($limiter && false === $limiter->consume()->isAccepted()) {
-                throw new TooManyRequestsHttpException();
-            }
-        }
-
         if ($dto->post->magazine->isBanned($user) || $user->isBanned()) {
             throw new UserBannedException();
         }

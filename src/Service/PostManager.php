@@ -53,13 +53,6 @@ class PostManager implements ContentManagerInterface
 
     public function create(PostDto $dto, User $user, $rateLimit = true): Post
     {
-        if ($rateLimit) {
-            $limiter = $this->postLimiter->create($dto->ip);
-            if ($limiter && false === $limiter->consume()->isAccepted()) {
-                throw new TooManyRequestsHttpException();
-            }
-        }
-
         if ($dto->magazine->isBanned($user) || $user->isBanned()) {
             throw new UserBannedException();
         }
