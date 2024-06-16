@@ -10,8 +10,10 @@ use App\Repository\Criteria;
 use App\Repository\DomainRepository;
 use App\Repository\EntryRepository;
 use Pagerfanta\PagerfantaInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 
 class DomainFrontController extends AbstractController
 {
@@ -21,8 +23,14 @@ class DomainFrontController extends AbstractController
     ) {
     }
 
-    public function __invoke(?string $name, ?string $sortBy, ?string $time, ?string $type, Request $request): Response
-    {
+    public function __invoke(
+        ?string $name,
+        ?string $sortBy,
+        ?string $time,
+        #[MapQueryParameter]
+        ?string $type,
+        Request $request
+    ): Response {
         if (!$domain = $this->domainRepository->findOneBy(['name' => $name])) {
             throw $this->createNotFoundException();
         }
@@ -35,11 +43,25 @@ class DomainFrontController extends AbstractController
         $method = $criteria->resolveSort($sortBy);
         $listing = $this->$method($criteria);
 
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(
+                [
+                    'html' => $this->renderView(
+                        'entry/_list.html.twig',
+                        [
+                            'entries' => $listing,
+                        ]
+                    ),
+                ]
+            );
+        }
+
         return $this->render(
             'domain/front.html.twig',
             [
                 'domain' => $domain,
                 'entries' => $listing,
+                'criteria' => $criteria,
             ]
         );
     }

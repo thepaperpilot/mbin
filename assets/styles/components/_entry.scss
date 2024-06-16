@@ -23,6 +23,7 @@
                        "vote meta"
                        "vote footer"
                        "moderate moderate"
+                       "preview preview"
                        "body body";
     grid-template-columns: min-content 1fr;
   }
@@ -62,6 +63,7 @@
                            "meta meta"
                            "footer footer"
                            "moderate moderate"
+                           "preview preview"
                            "body body";
       grid-template-columns: min-content 1fr;
     }
@@ -92,6 +94,7 @@
                        "meta meta"
                        "footer footer"
                        "moderate moderate"
+                       "preview preview"
                        "body body";
       grid-template-columns: 1fr min-content;
     }
@@ -171,6 +174,12 @@
       border-bottom-left-radius: 0 !important;
     }
 
+    .figure-badge {
+      bottom: .25rem;
+      right: .25rem;
+      gap: .25rem;
+    }
+
     .sensitive-button-label {
       line-height: 1rem;
     }
@@ -191,6 +200,10 @@
         width: calc(100% - 10px);
 
         .sensitive-button-hide {
+          display: none;
+        }
+
+        .figure-badge {
           display: none;
         }
       }
@@ -331,9 +344,14 @@
   &__domain {
     color: var(--kbin-meta-text-color);
     font-size: .7rem;
+    white-space: nowrap;
 
     a {
       color: var(--kbin-meta-text-color);
+    }
+
+    i {
+      font-size: .6rem;
     }
   }
 
@@ -428,6 +446,24 @@
   }
 }
 
+.entries-cross-2, .entries-cross-3 {
+  display: grid;
+  margin: 0;
+  padding: 0;
+
+  @include media-breakpoint-down(lg) {
+    display: block;
+  }
+}
+
+.entries-cross-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.entries-cross-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .entry-cross {
   grid-template-areas: "vote meta"
                        "preview preview"
@@ -465,6 +501,31 @@
 
   .meta {
     align-self: center;
+
+    @include media-breakpoint-down(lg) {
+      & div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 270px;
+      }
+    }
+
+    @include media-breakpoint-up(lg) {
+      .entries-cross-2 & div, .entries-cross-3 & div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .entries-cross-2 & div {
+        max-width: 370px;
+      }
+
+      .entries-cross-3 & div {
+        max-width: 270px;
+      }
+    }
   }
 
   footer {

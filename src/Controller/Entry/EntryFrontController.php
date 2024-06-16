@@ -5,220 +5,108 @@ declare(strict_types=1);
 namespace App\Controller\Entry;
 
 use App\Controller\AbstractController;
-use App\Controller\User\ThemeSettingsController;
+use App\DTO\PostDto;
 use App\Entity\Magazine;
 use App\Entity\User;
+use App\Form\PostType;
 use App\PageView\EntryPageView;
+use App\PageView\PostPageView;
 use App\Pagination\Pagerfanta as MbinPagerfanta;
-use App\Repository\Criteria;
 use App\Repository\EntryRepository;
+use App\Repository\PostRepository;
 use Pagerfanta\PagerfantaInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 
 class EntryFrontController extends AbstractController
 {
-    public function __construct(private readonly EntryRepository $repository)
-    {
+    public function __construct(
+        private readonly EntryRepository $entryRepository,
+        private readonly PostRepository $postRepository
+    ) {
     }
 
-    public function root(?string $sortBy, ?string $time, ?string $type, Request $request): Response
-    {
+    public function front(
+        string $subscription,
+        string $content,
+        ?string $sortBy,
+        ?string $time,
+        string $federation,
+        #[MapQueryParameter]
+        ?string $type,
+        Request $request
+    ): Response {
         $user = $this->getUser();
 
-        if (!$user) {
-            return $this->front($sortBy, $time, $type, $request);
+        $criteria = $this->createCriteria($content, $request);
+        $criteria->showSortOption($criteria->resolveSort($sortBy))
+            ->setFederation($federation)
+            ->setTime($criteria->resolveTime($time))
+            ->setType($criteria->resolveType($type));
+
+        if ('home' === $subscription) {
+            $subscription = $this->subscriptionFor($user);
+        }
+        $this->handleSubscription($subscription, $criteria);
+
+        $this->setUserPreferences($user, $criteria);
+
+        if ('threads' === $content) {
+            $entities = $this->entryRepository->findByCriteria($criteria);
+            $entities = $this->handleCrossposts($entities);
+            $templatePath = 'entry/';
+            $dataKey = 'entries';
+        } elseif ('microblog' === $content) {
+            $entities = $this->postRepository->findByCriteria($criteria);
+            $templatePath = 'post/';
+            $dataKey = 'posts';
+        } else {
+            throw new \LogicException("Invalid content filter '{$content}'");
         }
 
-        $front = match ($user->homepage) {
-            User::HOMEPAGE_SUB => 'subscribed',
-            User::HOMEPAGE_MOD => 'moderated',
-            User::HOMEPAGE_FAV => 'favourite',
-            default => 'front',
-        };
-
-        return $this->$front($sortBy, $time, $type, $request);
+        return $this->renderResponse(
+            $request,
+            $content,
+            $criteria,
+            [$dataKey => $entities],
+            $templatePath,
+            $user
+        );
     }
 
-    public function front(?string $sortBy, ?string $time, ?string $type, Request $request): Response
-    {
+    public function frontRedirect(
+        string $content,
+        ?string $sortBy,
+        ?string $time,
+        string $federation,
+        #[MapQueryParameter]
+        ?string $type,
+        Request $request
+    ): Response {
         $user = $this->getUser();
-        $criteria = new EntryPageView($this->getPageNb($request));
-        $criteria->showSortOption($criteria->resolveSort($sortBy))
-            ->setFederation(
-                'false' === $request->cookies->get(
-                    ThemeSettingsController::KBIN_FEDERATION_ENABLED,
-                    true
-                ) ? Criteria::AP_LOCAL : Criteria::AP_ALL
-            )
-            ->setTime($criteria->resolveTime($time))
-            ->setType($criteria->resolveType($type));
+        $subscription = $this->subscriptionFor($user);
 
-        if (null !== $user && 0 < \count($user->preferredLanguages)) {
-            $criteria->languages = $user->preferredLanguages;
-        }
-
-        $method = $criteria->resolveSort($sortBy);
-        $posts = $this->$method($criteria);
-
-        $posts = $this->handleCrossposts($posts);
-
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse(
-                [
-                    'html' => $this->renderView(
-                        'entry/_list.html.twig',
-                        [
-                            'entries' => $posts,
-                        ]
-                    ),
-                ]
-            );
-        }
-
-        return $this->render(
-            'entry/front.html.twig',
-            [
-                'entries' => $posts,
-            ]
-        );
-    }
-
-    #[IsGranted('ROLE_USER')]
-    public function subscribed(?string $sortBy, ?string $time, ?string $type, Request $request): Response
-    {
-        $user = $this->getUserOrThrow();
-
-        $criteria = new EntryPageView($this->getPageNb($request));
-        $criteria->showSortOption($criteria->resolveSort($sortBy))
-            ->setFederation(
-                'false' === $request->cookies->get(
-                    ThemeSettingsController::KBIN_FEDERATION_ENABLED,
-                    true
-                ) ? Criteria::AP_LOCAL : Criteria::AP_ALL
-            )
-            ->setTime($criteria->resolveTime($time))
-            ->setType($criteria->resolveType($type));
-        $criteria->subscribed = true;
-
-        if (0 < \count($user->preferredLanguages)) {
-            $criteria->languages = $user->preferredLanguages;
-        }
-
-        $method = $criteria->resolveSort($sortBy);
-        $listing = $this->$method($criteria);
-
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse(
-                [
-                    'html' => $this->renderView(
-                        'entry/_list.html.twig',
-                        [
-                            'entries' => $listing,
-                        ]
-                    ),
-                ]
-            );
-        }
-
-        return $this->render(
-            'entry/front.html.twig',
-            [
-                'entries' => $listing,
-            ]
-        );
-    }
-
-    #[IsGranted('ROLE_USER')]
-    public function moderated(?string $sortBy, ?string $time, ?string $type, Request $request): Response
-    {
-        $criteria = new EntryPageView($this->getPageNb($request));
-        $criteria->showSortOption($criteria->resolveSort($sortBy))
-            ->setFederation(
-                'false' === $request->cookies->get(
-                    ThemeSettingsController::KBIN_FEDERATION_ENABLED,
-                    true
-                ) ? Criteria::AP_LOCAL : Criteria::AP_ALL
-            )
-            ->setTime($criteria->resolveTime($time))
-            ->setType($criteria->resolveType($type));
-        $criteria->moderated = true;
-
-        // We do not set language filter for moderated view.
-
-        $method = $criteria->resolveSort($sortBy);
-        $listing = $this->$method($criteria);
-
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse(
-                [
-                    'html' => $this->renderView(
-                        'entry/_list.html.twig',
-                        [
-                            'entries' => $listing,
-                        ]
-                    ),
-                ]
-            );
-        }
-
-        return $this->render(
-            'entry/front.html.twig',
-            [
-                'entries' => $listing,
-            ]
-        );
-    }
-
-    #[IsGranted('ROLE_USER')]
-    public function favourite(?string $sortBy, ?string $time, ?string $type, Request $request): Response
-    {
-        $criteria = new EntryPageView($this->getPageNb($request));
-        $criteria->showSortOption($criteria->resolveSort($sortBy))
-            ->setFederation(
-                'false' === $request->cookies->get(
-                    ThemeSettingsController::KBIN_FEDERATION_ENABLED,
-                    true
-                ) ? Criteria::AP_LOCAL : Criteria::AP_ALL
-            )
-            ->setTime($criteria->resolveTime($time))
-            ->setType($criteria->resolveType($type));
-        $criteria->favourite = true;
-
-        // No language criteria for favourites, either
-
-        $method = $criteria->resolveSort($sortBy);
-        $listing = $this->$method($criteria);
-
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse(
-                [
-                    'html' => $this->renderView(
-                        'entry/_list.html.twig',
-                        [
-                            'entries' => $listing,
-                        ]
-                    ),
-                ]
-            );
-        }
-
-        return $this->render(
-            'entry/front.html.twig',
-            [
-                'entries' => $listing,
-            ]
-        );
+        return $this->redirectToRoute('front', [
+            'subscription' => $subscription,
+            'sortBy' => $sortBy,
+            'time' => $time,
+            'type' => $type,
+            'federation' => $federation,
+            'content' => $content,
+        ]);
     }
 
     public function magazine(
         #[MapEntity(expr: 'repository.findOneByName(name)')]
         Magazine $magazine,
+        string $content,
         ?string $sortBy,
         ?string $time,
+        string $federation,
+        #[MapQueryParameter]
         ?string $type,
         Request $request
     ): Response {
@@ -228,78 +116,141 @@ class EntryFrontController extends AbstractController
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
         }
 
-        $criteria = (new EntryPageView($this->getPageNb($request)));
+        $criteria = $this->createCriteria($content, $request);
         $criteria->showSortOption($criteria->resolveSort($sortBy))
-            ->setFederation(
-                'false' === $request->cookies->get(
-                    ThemeSettingsController::KBIN_FEDERATION_ENABLED,
-                    true
-                ) ? Criteria::AP_LOCAL : Criteria::AP_ALL
-            )
+            ->setFederation($federation)
             ->setTime($criteria->resolveTime($time))
             ->setType($criteria->resolveType($type));
         $criteria->magazine = $magazine;
         $criteria->stickiesFirst = true;
 
-        if (null !== $user && 0 < \count($user->preferredLanguages)) {
-            $criteria->languages = $user->preferredLanguages;
+        $subscription = $request->query->get('subscription') ?: 'all';
+        $this->handleSubscription($subscription, $criteria);
+
+        $this->setUserPreferences($user, $criteria);
+
+        if ('threads' === $content) {
+            $entities = $this->entryRepository->findByCriteria($criteria);
+            // Note no crosspost handling
+            $templatePath = 'entry/';
+            $dataKey = 'entries';
+        } elseif ('microblog' === $content) {
+            $entities = $this->postRepository->findByCriteria($criteria);
+            $templatePath = 'post/';
+            $dataKey = 'posts';
+        } else {
+            throw new \LogicException("Invalid content filter '{$content}'");
         }
 
-        $method = $criteria->resolveSort($sortBy);
-        $listing = $this->$method($criteria);
-
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse(
-                [
-                    'html' => $this->renderView(
-                        'entry/_list.html.twig',
-                        [
-                            'magazine' => $magazine,
-                            'entries' => $listing,
-                        ]
-                    ),
-                ]
-            );
-        }
-
-        return $this->render(
-            'entry/front.html.twig',
-            [
-                'magazine' => $magazine,
-                'entries' => $listing,
-            ],
-            $response
+        return $this->renderResponse(
+            $request,
+            $content,
+            $criteria,
+            [$dataKey => $entities, 'magazine' => $magazine],
+            $templatePath,
+            $user
         );
     }
 
-    private function hot(EntryPageView $criteria): PagerfantaInterface
-    {
-        return $this->repository->findByCriteria($criteria->showSortOption(Criteria::SORT_HOT));
+    /**
+     * @param string $name magazine name
+     */
+    public function magazineRedirect(
+        string $name,
+        string $content,
+        ?string $sortBy,
+        ?string $time,
+        string $federation,
+        #[MapQueryParameter]
+        ?string $type,
+        Request $request
+    ): Response {
+        $user = $this->getUser(); // Fetch the user
+        $subscription = $this->subscriptionFor($user); // Determine the subscription filter based on the user
+
+        return $this->redirectToRoute('front_magazine', [
+            'name' => $name,
+            'subscription' => $subscription,
+            'sortBy' => $sortBy,
+            'time' => $time,
+            'type' => $type,
+            'federation' => $federation,
+            'content' => $content,
+        ]);
     }
 
-    private function top(EntryPageView $criteria): PagerfantaInterface
+    private function createCriteria(string $content, Request $request)
     {
-        return $this->repository->findByCriteria($criteria->showSortOption(Criteria::SORT_TOP));
+        if ('threads' === $content) {
+            $criteria = new EntryPageView($this->getPageNb($request));
+        } elseif ('microblog' === $content) {
+            $criteria = new PostPageView($this->getPageNb($request));
+        } else {
+            throw new \LogicException('Invalid content '.$content);
+        }
+
+        return $criteria->setContent($content);
     }
 
-    private function active(EntryPageView $criteria): PagerfantaInterface
+    private function handleSubscription(string $subscription, &$criteria)
     {
-        return $this->repository->findByCriteria($criteria->showSortOption(Criteria::SORT_ACTIVE));
+        if (\in_array($subscription, ['sub', 'mod', 'fav'])) {
+            $this->denyAccessUnlessGranted('ROLE_USER');
+            $this->getUserOrThrow();
+        }
+
+        if ('sub' === $subscription) {
+            $criteria->subscribed = true;
+        } elseif ('mod' === $subscription) {
+            $criteria->moderated = true;
+        } elseif ('fav' === $subscription) {
+            $criteria->favourite = true;
+        } elseif ($subscription && 'all' !== $subscription) {
+            throw new \LogicException('Invalid subscription filter '.$subscription);
+        }
     }
 
-    private function newest(EntryPageView $criteria): PagerfantaInterface
+    private function setUserPreferences(?User $user, &$criteria)
     {
-        return $this->repository->findByCriteria($criteria->showSortOption(Criteria::SORT_NEW));
+        if (null !== $user && 0 < \count($user->preferredLanguages)) {
+            $criteria->languages = $user->preferredLanguages;
+        }
     }
 
-    private function oldest(EntryPageView $criteria): PagerfantaInterface
+    private function renderResponse(Request $request, $content, $criteria, $data, $templatePath, ?User $user)
     {
-        return $this->repository->findByCriteria($criteria->showSortOption(Criteria::SORT_OLD));
+        $baseData = array_merge(['criteria' => $criteria], $data);
+
+        if ('microblog' === $content) {
+            $dto = new PostDto();
+            if (isset($data['magazine'])) {
+                $dto->magazine = $data['magazine'];
+            }
+            $baseData['form'] = $this->createForm(PostType::class)->setData($dto)->createView();
+            $baseData['user'] = $user;
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'html' => $this->renderView($templatePath.'_list.html.twig', $data),
+            ]);
+        }
+
+        return $this->render($templatePath.'front.html.twig', $baseData);
     }
 
-    private function commented(EntryPageView $criteria): PagerfantaInterface
+    private function subscriptionFor(?User $user): string
     {
-        return $this->repository->findByCriteria($criteria->showSortOption(Criteria::SORT_COMMENTED));
+        if ($user) {
+            return match ($user->homepage) {
+                User::HOMEPAGE_SUB => 'sub',
+                User::HOMEPAGE_MOD => 'mod',
+                User::HOMEPAGE_FAV => 'fav',
+                default => 'all',
+            };
+        } else {
+            return 'all'; // Global default
+        }
     }
 
     private function handleCrossposts($pagination): PagerfantaInterface

@@ -30,6 +30,8 @@ use Doctrine\ORM\Mapping\ManyToOne;
     'post_comment_deleted' => MagazineLogPostCommentDeleted::class,
     'post_comment_restored' => MagazineLogPostCommentRestored::class,
     'ban' => MagazineLogBan::class,
+    'moderator_add' => MagazineLogModeratorAdd::class,
+    'moderator_remove' => MagazineLogModeratorRemove::class,
 ])]
 abstract class MagazineLog
 {
@@ -38,10 +40,10 @@ abstract class MagazineLog
     }
 
     #[ManyToOne(targetEntity: Magazine::class, inversedBy: 'logs')]
-    #[JoinColumn(nullable: false)]
+    #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
     public Magazine $magazine;
     #[ManyToOne(targetEntity: User::class)]
-    #[JoinColumn(nullable: false)]
+    #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
     public User $user;
     #[Id]
     #[GeneratedValue]

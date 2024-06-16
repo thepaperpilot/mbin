@@ -7,33 +7,40 @@ namespace App\Controller\Security;
 use App\Controller\AbstractController;
 use App\Form\UserRegisterType;
 use App\Service\IpResolver;
+use App\Service\SettingsManager;
 use App\Service\UserManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class RegisterController extends AbstractController
 {
-    public function __invoke(
-        UserManager $manager,
-        Request $request,
-        IpResolver $ipResolver
-    ): Response {
-        if ($this->getParameter('sso_only_mode')) {
+    public function __construct(
+        private readonly UserManager $manager,
+        private readonly IpResolver $ipResolver,
+        private readonly SettingsManager $settingsManager,
+    ) {
+    }
+
+    public function __invoke(Request $request): Response
+    {
+        if (true === $this->settingsManager->get('MBIN_SSO_ONLY_MODE')) {
             return $this->redirectToRoute('app_login');
         }
 
         if ($this->getUser()) {
-            return $this->redirectToRoute('front_subscribed');
+            return $this->redirectToRoute('front');
         }
 
-        $form = $this->createForm(UserRegisterType::class);
+        $form = $this->createForm(UserRegisterType::class, options: [
+            'antispam_profile' => 'default',
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $dto = $form->getData();
-            $dto->ip = $ipResolver->resolve();
+            $dto->ip = $this->ipResolver->resolve();
 
-            $manager->create($dto);
+            $this->manager->create($dto);
 
             $this->addFlash(
                 'success',

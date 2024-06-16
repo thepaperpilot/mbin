@@ -17,19 +17,21 @@
         <li class="dropdown__separator"></li>
         <li>
             <a target="_blank"
+                rel="{{ get_rel(comment.apId ?? path('ap_entry_comment', {magazine_name: comment.magazine.name, entry_id: comment.entry.id, comment_id: comment.id})) }}"
                 href="{{ comment.apId ?? path('ap_entry_comment', {magazine_name: comment.magazine.name, entry_id: comment.entry.id, comment_id: comment.id}) }}">
                 {{ 'open_url_to_fediverse'|trans }}
             </a>
         </li>
         <li>
             <a data-action="clipboard#copy"
+                rel="{{ get_rel(comment.apId ?? path('ap_entry_comment', {magazine_name: comment.magazine.name, entry_id: comment.entry.id, comment_id: comment.id})) }}"
                 href="{{ comment.apId ?? path('ap_entry_comment', {magazine_name: comment.magazine.name, entry_id: comment.entry.id, comment_id: comment.id}) }}">
                 {{ 'copy_url_to_fediverse'|trans }}
             </a>
         </li>
         <li>
             <a data-action="clipboard#copy"
-                href="{{ entry_url(comment.entry) }}#{{ get_url_fragment(comment) }}">
+                href="{{ entry_comment_view_url(comment) }}#{{ get_url_fragment(comment) }}">
                 {{ 'copy_url'|trans }}
             </a>
         </li>

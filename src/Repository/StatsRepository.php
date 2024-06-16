@@ -14,7 +14,6 @@ abstract class StatsRepository extends ServiceEntityRepository
 {
     public const TYPE_GENERAL = 'general';
     public const TYPE_CONTENT = 'content';
-    public const TYPE_VIEWS = 'views';
     public const TYPE_VOTES = 'votes';
 
     protected ?\DateTime $start;
@@ -104,5 +103,45 @@ abstract class StatsRepository extends ServiceEntityRepository
     protected function getStartDate(array $values): array
     {
         return array_map(fn ($val) => ['year' => $val['year'], 'month' => $val['month']], $values);
+    }
+
+    protected function prepareContentReturn(array $entries, array $comments, array $posts, array $replies): array
+    {
+        $startDate = $this->sort(
+            array_merge(
+                $this->getStartDate($entries),
+                $this->getStartDate($comments),
+                $this->getStartDate($posts),
+                $this->getStartDate($replies)
+            )
+        );
+
+        if (empty($startDate) || !\array_key_exists('year', $startDate[0]) || !\array_key_exists('month', $startDate[0])) {
+            return [
+                'entries' => [],
+                'comments' => [],
+                'posts' => [],
+                'replies' => [],
+            ];
+        }
+
+        return [
+            'entries' => $this->prepareContentOverall(
+                $this->sort($entries),
+                $startDate[0]['year'],
+                $startDate[0]['month']
+            ),
+            'comments' => $this->prepareContentOverall(
+                $this->sort($comments),
+                $startDate[0]['year'],
+                $startDate[0]['month']
+            ),
+            'posts' => $this->prepareContentOverall($this->sort($posts), $startDate[0]['year'], $startDate[0]['month']),
+            'replies' => $this->prepareContentOverall(
+                $this->sort($replies),
+                $startDate[0]['year'],
+                $startDate[0]['month']
+            ),
+        ];
     }
 }

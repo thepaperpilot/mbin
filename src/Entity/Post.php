@@ -9,7 +9,6 @@ use App\Entity\Contracts\CommentInterface;
 use App\Entity\Contracts\FavouriteInterface;
 use App\Entity\Contracts\RankingInterface;
 use App\Entity\Contracts\ReportInterface;
-use App\Entity\Contracts\TagInterface;
 use App\Entity\Contracts\VisibilityInterface;
 use App\Entity\Contracts\VotableInterface;
 use App\Entity\Traits\ActivityPubActivityTrait;
@@ -42,7 +41,7 @@ use Webmozart\Assert\Assert;
 #[Index(columns: ['created_at'], name: 'post_created_at_idx')]
 #[Index(columns: ['last_active'], name: 'post_last_active_at_idx')]
 #[Index(columns: ['body_ts'], name: 'post_body_ts_idx')]
-class Post implements VotableInterface, CommentInterface, VisibilityInterface, RankingInterface, ReportInterface, FavouriteInterface, TagInterface, ActivityPubActivityInterface
+class Post implements VotableInterface, CommentInterface, VisibilityInterface, RankingInterface, ReportInterface, FavouriteInterface, ActivityPubActivityInterface
 {
     use VotableTrait;
     use RankingTrait;
@@ -54,7 +53,7 @@ class Post implements VotableInterface, CommentInterface, VisibilityInterface, R
     }
 
     #[ManyToOne(targetEntity: User::class, inversedBy: 'posts')]
-    #[JoinColumn(nullable: false)]
+    #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
     public User $user;
     #[ManyToOne(targetEntity: Magazine::class, inversedBy: 'posts')]
     #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -83,19 +82,19 @@ class Post implements VotableInterface, CommentInterface, VisibilityInterface, R
     #[Column(type: 'string', nullable: true)]
     public ?string $ip = null;
     #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
-    public ?array $tags = null;
-    #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
     public ?array $mentions = null;
-    #[OneToMany(mappedBy: 'post', targetEntity: PostComment::class, orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'post', targetEntity: PostComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     public Collection $comments;
     #[OneToMany(mappedBy: 'post', targetEntity: PostVote::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $votes;
-    #[OneToMany(mappedBy: 'post', targetEntity: PostReport::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'post', targetEntity: PostReport::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $reports;
-    #[OneToMany(mappedBy: 'post', targetEntity: PostFavourite::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'post', targetEntity: PostFavourite::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $favourites;
-    #[OneToMany(mappedBy: 'post', targetEntity: PostCreatedNotification::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'post', targetEntity: PostCreatedNotification::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $notifications;
+    #[OneToMany(mappedBy: 'post', targetEntity: HashtagLink::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    public Collection $hashtags;
     public array $children = [];
     #[Id]
     #[GeneratedValue]
@@ -350,11 +349,6 @@ class Post implements VotableInterface, CommentInterface, VisibilityInterface, R
     public function isAdult(): bool
     {
         return $this->isAdult || $this->magazine->isAdult;
-    }
-
-    public function getTags(): array
-    {
-        return array_values($this->tags ?? []);
     }
 
     public function __sleep()

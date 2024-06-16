@@ -1,16 +1,20 @@
 domain_entries:
   controller: App\Controller\Domain\DomainFrontController
-  defaults: { sortBy: hot, time: '∞', type: ~ }
-  path: /d/{name}/{sortBy}/{time}/{type}
+  defaults: { sortBy: hot, time: '∞'}
+  path: /d/{name}/{sortBy}/{time}
   methods: [ GET ]
-  requirements: { sortBy: "%front_sort_options%" }
+  requirements:
+    sortBy: "%default_sort_options%"
+    time: "%default_time_options%"
 
 domain_comments:
   controller: App\Controller\Domain\DomainCommentFrontController
   defaults: { sortBy: hot, time: ~ }
   path: /d/{name}/comments/{sortBy}/{time}
   methods: [GET]
-  requirements: { sortBy: "%front_sort_options%" }
+  requirements:
+    sortBy: "%comment_sort_options%"
+    time: "%default_time_options%"
 
 domain_subscribe:
   controller: App\Controller\Domain\DomainSubController::subscribe

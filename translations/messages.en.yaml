@@ -15,6 +15,7 @@ search: Search
 add: Add
 select_channel: Select a channel
 login: Log in
+sort_by: Sort by
 top: Top
 hot: Hot
 active: Active
@@ -24,15 +25,18 @@ commented: Commented
 change_view: Change view
 filter_by_time: Filter by time
 filter_by_type: Filter by type
+filter_by_subscription: Filter by subscription
+filter_by_federation: Filter by federation status
 comments_count: '{0}Comments|{1}Comment|]1,Inf[ Comments'
 subscribers_count: '{0}Subscribers|{1}Subscriber|]1,Inf[ Subscribers'
 followers_count: '{0}Followers|{1}Follower|]1,Inf[ Followers'
+marked_for_deletion: Marked for deletion
+marked_for_deletion_at: Marked for deletion at %date%
 favourites: Favorites
 favourite: Favorite
 more: More
 avatar: Avatar
 added: Added
-views: Views
 up_votes: Boosts
 down_votes: Reduces
 no_comments: No comments
@@ -57,8 +61,11 @@ cover: Cover
 related_posts: Related posts
 random_posts: Random posts
 federated_magazine_info: This magazine is from a federated server and may be incomplete.
+disconnected_magazine_info: This magazine is not receiving updates (last activity %days% day(s) ago).
+always_disconnected_magazine_info: This magazine is not receiving updates.
+subscribe_for_updates: Subscribe to start receiving updates.
 federated_user_info: This profile is from a federated server and may be incomplete.
-go_to_original_instance: Browse more on the original instance.
+go_to_original_instance: View on remote instance
 empty: Empty
 subscribe: Subscribe
 unsubscribe: Unsubscribe
@@ -76,6 +83,7 @@ reset_password: Reset password
 show_more: Show more
 to: to
 in: in
+from: from
 username: Username
 email: Email
 repeat_password: Repeat password
@@ -118,6 +126,7 @@ url: URL
 title: Title
 body: Body
 tags: Tags
+tag: Tag
 badges: Badges
 is_adult: 18+ / NSFW
 eng: ENG
@@ -137,7 +146,6 @@ columns: Columns
 user: User
 joined: Joined
 moderated: Moderated
-ratio: Ratio
 people_local: Local
 people_federated: Federated
 reputation_points: Reputation points
@@ -304,6 +312,13 @@ magazine_panel: Magazine panel
 reject: Reject
 approve: Approve
 ban: Ban
+unban: Unban
+ban_hashtag_btn: Ban Hashtag
+ban_hashtag_description: Banning a hashtag will stop posts with this hashtag from being created,
+  as well as hiding existing posts with this hashtag.
+unban_hashtag_btn: Unban Hashtag
+unban_hashtag_description: Unbanning a hashtag will allow creating posts with this hashtag again.
+  Existing posts with this hashtag are no longer hidden.
 filters: Filters
 approved: Approved
 rejected: Rejected
@@ -367,7 +382,6 @@ delete_account: Delete account
 purge_account: Purge account
 ban_account: Ban account
 unban_account: Unban account
-delete_account_request_send: Your request to delete the account has been submitted.
 related_magazines: Related magazines
 random_magazines: Random magazines
 magazine_panel_tags_info: Provide only if you want content from the fediverse to be
@@ -435,15 +449,19 @@ federation_page_enabled: Federation page enabled
 federation_page_allowed_description: Known instances we federate with
 federation_page_disallowed_description: Instances we do not federate with
 federated_search_only_loggedin: Federated search limited if not logged in
-sidebar_sections_local_only: Restrict "Random X" and "Active People" sections to local only
-request_account_deletion_title: Account deletion
-request_account_deletion_description: The administrator will be notified that you
-  want your account deleted.
-request_account_deletion_button: Request account deletion
+sidebar_sections_local_only: Restrict "Random X" and "Active People" sections to local
+  only
+account_deletion_title: Account deletion
+account_deletion_description: Your account will be deleted in 30 days unless you choose to delete the account immediately.
+  The account cannot be restored once deleted.
+account_deletion_button: Delete Account
+account_deletion_immediate: Delete immediately
 more_from_domain: More from domain
 errors.server500.title: 500 Internal Server Error
-errors.server500.description: Sorry, something went wrong on our end. If you continue to see this error, try contacting the instance owner.
-  If this instance is not working at all, check out %link_start%other Mbin instances%link_end% in the meanwhile until the problem is resolved.
+errors.server500.description: Sorry, something went wrong on our end. If you continue
+  to see this error, try contacting the instance owner. If this instance is not working
+  at all, check out %link_start%other Mbin instances%link_end% in the meanwhile until
+  the problem is resolved.
 errors.server429.title: 429 Too Many Requests
 errors.server404.title: 404 Not found
 errors.server403.title: 403 Forbidden
@@ -474,6 +492,7 @@ oauth.client_identifier.invalid: Invalid OAuth Client ID!
 oauth.client_not_granted_message_read_permission: This app has not received permission
   to read your messages.
 restrict_oauth_clients: Restrict OAuth2 Client creation to Admins
+private_instance: Force users to login before they can access any content
 block: Block
 unblock: Unblock
 oauth2.grant.moderate.magazine.ban.delete: Unban users in your moderated magazines.
@@ -668,10 +687,14 @@ delete_content_desc: Delete the user's content while leaving the responses of ot
   users in the created threads, posts and comments.
 purge_content_desc: Completely purge the user's content, including deleting the responses
   of other users in created threads, posts and comments.
-delete_account_desc: Delete the account while leaving the responses of other users
-  in the created threads, posts and comments.
-purge_account_desc: Completely purge the account, including deleting the responses
+delete_account_desc: Delete the account, including the responses
   of other users in created threads, posts and comments.
+schedule_delete_account: Schedule Deletion
+schedule_delete_account_desc: Schedule the deletion of this account in 30 days.
+  This will hide the user and their content as well as prevent the user from logging in.
+remove_schedule_delete_account: Remove Scheduled Deletion
+remove_schedule_delete_account_desc: Remove the scheduled deletion.
+  All the content will be available again and the user will be able to login.
 two_factor_authentication: Two-factor authentication
 two_factor_backup: Two-factor authentication backup codes
 2fa.authentication_code.label: Authentication Code
@@ -691,7 +714,7 @@ two_factor_backup: Two-factor authentication backup codes
   for your account
 2fa.qr_code_link.title: Visiting this link may allow your platform to register this
   two-factor authentication
-2fa.user_active_tfa.title: User has active 2fa
+2fa.user_active_tfa.title: User has active 2FA
 2fa.available_apps: Use a two-factor authentication app such as %google_authenticator%,
   %aegis% (Android) or %raivo% (iOS) to scan the QR-code.
 2fa.backup_codes.help: You can use these codes when you don't have your two-factor
@@ -700,7 +723,7 @@ two_factor_backup: Two-factor authentication backup codes
 2fa.backup_codes.recommendation: It is recommended that you keep a copy of them in
   a safe place.
 cancel: Cancel
-password_and_2fa: Password & 2fa
+password_and_2fa: Password & 2FA
 flash_account_settings_changed: Your account settings have been successfully changed.
   You will need to login again.
 show_subscriptions: Show subscriptions
@@ -718,6 +741,7 @@ position_bottom: Bottom
 position_top: Top
 pending: Pending
 flash_thread_new_error: Thread could not be created. Something went wrong.
+flash_thread_tag_banned_error: Thread could not be created. The content is not allowed.
 flash_email_was_sent: Email has been successfully sent.
 flash_email_failed_to_sent: Email could not be sent.
 flash_post_new_success: Post has been successfully created.
@@ -741,6 +765,8 @@ page_width: Page width
 page_width_max: Max
 page_width_auto: Auto
 page_width_fixed: Fixed
+filter_labels: Filter Labels
+auto: Auto
 open_url_to_fediverse: Open original URL
 change_my_avatar: Change my avatar
 change_my_cover: Change my cover
@@ -754,10 +780,8 @@ purge_magazine: Purge magazine
 magazine_is_deleted: Magazine is deleted. You can <a href="%link_target%">restore</a>
   it within 30 days.
 suspend_account: Suspend account
-request_account_deletion_revoke_button: Revoke the account deletion request.
 unsuspend_account: Unsuspend account
 account_suspended: The account has been suspended.
-delete_account_request_revoke: Your request to delete the account has been revoked.
 account_unsuspended: The account has been unsuspended.
 deletion: Deletion
 user_suspend_desc: Suspending your account hides your content on the instance, but
@@ -793,3 +817,16 @@ spoiler: Spoiler
 all_time: All time
 show: Show
 hide: Hide
+edited: edited
+sso_registrations_enabled: SSO registrations enabled
+sso_registrations_enabled.error: New account registrations with third-party identity managers are currently disabled.
+sso_only_mode: Restrict login and registration to SSO methods only
+related_entry: Related
+restrict_magazine_creation: Restrict local magazine creation to admins and global mods
+sso_show_first: Show SSO first on login and registration pages
+continue_with: Continue with
+cake_day: Cake day
+someone: Someone
+magazine_log_mod_added: has added a moderator
+magazine_log_mod_removed: has removed a moderator
+last_updated: Last updated

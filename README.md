@@ -2,7 +2,8 @@
 
 Mbin is a fork of [/kbin](https://codeberg.org/Kbin/kbin-core), community-focused. Feel free to discuss on [Matrix](https://matrix.to/#/#mbin:melroy.org) and to create Pull Requests.
 
-**Important:** Mbin is focused on what the community wants, pull requests can be merged by any repo owner (with merge rights in GitHub). Discussions take place on [Matrix](https://matrix.to/#/#mbin:melroy.org) then _consensus_ has to be reached by the community. If approved by the community, only one approval on the PR is required by one of the Mbin maintainers. It's built entirely on trust.
+> [!Important]
+> Mbin is focused on what the community wants, pull requests can be merged by any repo maintainer (with merge rights in GitHub). Discussions take place on [Matrix](https://matrix.to/#/#mbin:melroy.org) then _consensus_ has to be reached by the community. If approved by the community, only one approval on the PR is required by one of the Mbin maintainers. It's built entirely on trust.
 
 Mbin is a decentralized content aggregator, voting, discussion and microblogging platform running on the fediverse network. It can
 communicate with many other ActivityPub services, including Kbin, Mastodon, Lemmy, Pleroma, Peertube. The initiative aims to
@@ -11,6 +12,7 @@ promote a free and open internet.
 [![Mbin Workflow](https://github.com/MbinOrg/mbin/actions/workflows/action.yaml/badge.svg?branch=main)](https://github.com/MbinOrg/mbin/actions/workflows/action.yaml?query=branch%3Amain)
 [![Psalm Security Scan](https://github.com/MbinOrg/mbin/actions/workflows/psalm.yml/badge.svg?branch=main)](https://github.com/MbinOrg/mbin/actions/workflows/psalm.yml?query=branch%3Amain)
 [![Translation status](https://hosted.weblate.org/widgets/mbin/-/svg-badge.svg)](https://hosted.weblate.org/engage/mbin/)
+[![Matrix](https://img.shields.io/badge/chat-on%20matrix-brightgreen)](https://matrix.to/#/#mbin:melroy.org)
 
 Unique Features of Mbin for server owners & users alike:
 
@@ -20,16 +22,15 @@ Unique Features of Mbin for server owners & users alike:
 - Support of **all** ActivityPub Actor Types (including also "Service" account support; thus support for robot accounts)
 - **Up-to-date** PHP packages and **security/vulnerability** issues fixed
 - Support for `application/json` Accept request header on all ActivityPub end-points
-- Easy migration path from Kbin to Mbin (see "Migrating?" below)
-- Introducing a [FAQ](FAQ.md) page
+- Introducing a hosted documentation: [docs.joinmbin.org](https://docs.joinmbin.org)
 
 See also: [all merged PRs](https://github.com/MbinOrg/mbin/pulls?q=is%3Apr+is%3Amerged) or [our releases](https://github.com/MbinOrg/mbin/releases).
 
 For developers:
 
-- Improved [bare metal/VM guide](docs/admin_guide.md) and [Docker guide](docs/docker_deployment_guide.md)
+- Improved [bare metal/VM guide](https://docs.joinmbin.org/admin/installation/bare_metal) and [Docker guide](https://docs.joinmbin.org/admin/installation/docker/)
 - [Improved Docker setup](https://github.com/MbinOrg/mbin/pulls?q=is%3Apr+is%3Amerged+label%3Adocker)
-- _Developer_ server explained (see "Developers" section down below)
+- _Developer_ server explained (see [Development Server documentation here](https://docs.joinmbin.org/contributing/development_server) )
 - GitHub Security advisories, vulnerability reporting, [Dependabot](https://github.com/features/security) and [Advanced code scanning](https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning) enabled. And we run [`local-php-security-checker`](https://github.com/fabpot/local-php-security-checker).
 - Improved **code documentation**
 - **Tight integration** with [Mbin Weblate project](https://hosted.weblate.org/engage/mbin/) for translations (Two way sync)
@@ -54,26 +55,241 @@ For developers:
 - [Translations](https://hosted.weblate.org/engage/mbin/)
 - [Contribution guidelines](CONTRIBUTING.md) - please read first, including before opening an issue!
 
+## Contributors
+
+<!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/ernestwisniewski">
+                    <img src="https://avatars.githubusercontent.com/u/10058784?v=4" width="100;" alt="ernestwisniewski"/>
+                    <br />
+                    <sub><b>Ernest</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/melroy89">
+                    <img src="https://avatars.githubusercontent.com/u/628926?v=4" width="100;" alt="melroy89"/>
+                    <br />
+                    <sub><b>Melroy van den Berg</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/e-five256">
+                    <img src="https://avatars.githubusercontent.com/u/146029455?v=4" width="100;" alt="e-five256"/>
+                    <br />
+                    <sub><b>e-five</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/asdfzdfj">
+                    <img src="https://avatars.githubusercontent.com/u/20770492?v=4" width="100;" alt="asdfzdfj"/>
+                    <br />
+                    <sub><b>asdfzdfj</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/SzymonKaminski">
+                    <img src="https://avatars.githubusercontent.com/u/8536735?v=4" width="100;" alt="SzymonKaminski"/>
+                    <br />
+                    <sub><b>SzymonKaminski</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/nobodyatroot">
+                    <img src="https://avatars.githubusercontent.com/u/35878315?v=4" width="100;" alt="nobodyatroot"/>
+                    <br />
+                    <sub><b>debounced</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/cooperaj">
+                    <img src="https://avatars.githubusercontent.com/u/400210?v=4" width="100;" alt="cooperaj"/>
+                    <br />
+                    <sub><b>Adam Cooper</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/BentiGorlich">
+                    <img src="https://avatars.githubusercontent.com/u/25664458?v=4" width="100;" alt="BentiGorlich"/>
+                    <br />
+                    <sub><b>BentiGorlich</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/simonrcodrington">
+                    <img src="https://avatars.githubusercontent.com/u/12083338?v=4" width="100;" alt="simonrcodrington"/>
+                    <br />
+                    <sub><b>Simon Codrington</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/weblate">
+                    <img src="https://avatars.githubusercontent.com/u/1607653?v=4" width="100;" alt="weblate"/>
+                    <br />
+                    <sub><b>Weblate (bot)</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/kkoyung">
+                    <img src="https://avatars.githubusercontent.com/u/11942650?v=4" width="100;" alt="kkoyung"/>
+                    <br />
+                    <sub><b>Kingsley Yung</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/TheVillageGuy">
+                    <img src="https://avatars.githubusercontent.com/u/47496248?v=4" width="100;" alt="TheVillageGuy"/>
+                    <br />
+                    <sub><b>TheVillageGuy</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/danielpervan">
+                    <img src="https://avatars.githubusercontent.com/u/5121830?v=4" width="100;" alt="danielpervan"/>
+                    <br />
+                    <sub><b>Daniel Pervan</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Ahrotahn">
+                    <img src="https://avatars.githubusercontent.com/u/40727284?v=4" width="100;" alt="Ahrotahn"/>
+                    <br />
+                    <sub><b>Ahrotahn</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/GauthierPLM">
+                    <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
+                    <br />
+                    <sub><b>Gauthier POGAM--LE MONTAGNER</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/CocoPoops">
+                    <img src="https://avatars.githubusercontent.com/u/7891055?v=4" width="100;" alt="CocoPoops"/>
+                    <br />
+                    <sub><b>CocoPoops</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/andrewmoise">
+                    <img src="https://avatars.githubusercontent.com/u/8404538?v=4" width="100;" alt="andrewmoise"/>
+                    <br />
+                    <sub><b>andrewmoise</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/chall8908">
+                    <img src="https://avatars.githubusercontent.com/u/315948?v=4" width="100;" alt="chall8908"/>
+                    <br />
+                    <sub><b>Chris Hall</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/thepaperpilot">
+                    <img src="https://avatars.githubusercontent.com/u/3683148?v=4" width="100;" alt="thepaperpilot"/>
+                    <br />
+                    <sub><b>Anthony Lawn</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/garrettw">
+                    <img src="https://avatars.githubusercontent.com/u/84885?v=4" width="100;" alt="garrettw"/>
+                    <br />
+                    <sub><b>Garrett W.</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/piotr-sikora-v">
+                    <img src="https://avatars.githubusercontent.com/u/1295000?v=4" width="100;" alt="piotr-sikora-v"/>
+                    <br />
+                    <sub><b>Piotr Sikora</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/lilfade">
+                    <img src="https://avatars.githubusercontent.com/u/4168401?v=4" width="100;" alt="lilfade"/>
+                    <br />
+                    <sub><b>Bryson</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/vpzomtrrfrt">
+                    <img src="https://avatars.githubusercontent.com/u/3528358?v=4" width="100;" alt="vpzomtrrfrt"/>
+                    <br />
+                    <sub><b>vpzomtrrfrt</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/cavebob">
+                    <img src="https://avatars.githubusercontent.com/u/75441692?v=4" width="100;" alt="cavebob"/>
+                    <br />
+                    <sub><b>cavebob</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/drupol">
+                    <img src="https://avatars.githubusercontent.com/u/252042?v=4" width="100;" alt="drupol"/>
+                    <br />
+                    <sub><b>Pol Dellaiera</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/ryanmonsen">
+                    <img src="https://avatars.githubusercontent.com/u/55466117?v=4" width="100;" alt="ryanmonsen"/>
+                    <br />
+                    <sub><b>ryanmonsen</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/WebVoid">
+                    <img src="https://avatars.githubusercontent.com/u/5394649?v=4" width="100;" alt="WebVoid"/>
+                    <br />
+                    <sub><b>Webvoid</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/comradekingu">
+                    <img src="https://avatars.githubusercontent.com/u/13802408?v=4" width="100;" alt="comradekingu"/>
+                    <br />
+                    <sub><b>Allan Nordhøy</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/CSDUMMI">
+                    <img src="https://avatars.githubusercontent.com/u/31551856?v=4" width="100;" alt="CSDUMMI"/>
+                    <br />
+                    <sub><b>CSDUMMI</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/privacyguard">
+                    <img src="https://avatars.githubusercontent.com/u/92675882?v=4" width="100;" alt="privacyguard"/>
+                    <br />
+                    <sub><b>privacyguard</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
+<!-- readme: contributors -end -->
+
+
 ## Getting Started
 
-### Migrating?
+### Documentation
 
-If you want to migrate from Kbin to Mbin (on bare metal), just follow the easy steps below (default branch is `main`):
-
-```bash
-# How to your current setup folder
-cd /var/www/your-instance
-# Override the git remote
-git remote set-url origin https://github.com/MbinOrg/mbin.git
-# Fetch the latest changes and move to the main branch
-git fetch
-git checkout main
-
-# Execute post upgrade script after migration/update
-./bin/post-upgrade
-```
-
-Done!
+See [docs.joinmbin.org](https://docs.joinmbin.org)
 
 ### Requirements
 
@@ -83,132 +299,9 @@ Done!
 - GD or Imagemagick PHP extension
 - NGINX / Apache / Caddy
 - PostgreSQL
-- Redis (optional)
+- RabbitMQ
+- Redis / KeyDB
 - Mercure (optional)
-- RabbitMQ (optional)
-
-## Documentation
-
-- [User Guide](docs/user_guide.md)
-- [Admin Bare Metal/VM Guide](docs/admin_guide.md)
-- [Admin Docker Guide](docs/docker_deployment_guide.md)
-- [Frequently Asked Questions (FAQ)](FAQ.md)
-- [Mbin REST API Swagger Docs](https://kbin.melroy.org/api/docs)
-- [Mbin ActivityPub Reference](https://fedidevs.org/projects/kbin/)
-
-## Developers
-
-### Start development server
-
-Requirements:
-
-- PHP v8.2
-- NodeJS
-- Redis
-- PostgreSQL
-- _Optionally:_ Mercure
-
----
-
-- Increase execution time in PHP config file: `/etc/php/8.2/fpm/php.ini`:
-
-```ini
-max_execution_time = 120
-```
-
-- Restart the PHP-FPM service: `sudo systemctl restart php8.2-fpm.service`
-- Connect to PostgreSQL using the postgres user:
-
-```bash
-sudo -u postgres psql
-```
-
-- Create new mbin database user:
-
-```sql
-sudo -u postgres createuser --createdb --createrole --pwprompt mbin
-```
-
-- Correctly configured `.env` file (`cp .env.example .env`), these are only the changes you need to pay attention to:
-
-```env
-# Set domain to 127.0.0.1:8000
-SERVER_NAME=127.0.0.1:8000
-KBIN_DOMAIN=127.0.0.1:8000
-KBIN_STORAGE_URL=http://127.0.0.1:8000/media
-
-#Redis (without password)
-REDIS_DNS=redis://127.0.0.1:6379
-
-# Set App configs
-APP_ENV=dev
-APP_SECRET=427f5e2940e5b2472c1b44b2d06e0525
-
-# Configure PostgreSQL
-POSTGRES_DB=mbin
-POSTGRES_USER=mbin
-POSTGRES_PASSWORD=<password>
-
-# Set messenger to Doctrine (= PostgresQL DB)
-MESSENGER_TRANSPORT_DSN=doctrine://default
-```
-
-- If you are using `127.0.0.1` to connect to the PostgreSQL server, edit the following file: `/etc/postgresql/<VERSION>/main/pg_hba.conf` and add:
-
-```conf
-local   mbin            mbin                                    md5
-```
-
-- Restart the PostgreSQL server: `sudo systemctl restart postgresql`
-- Create database: `php bin/console doctrine:database:create`
-- Create tables and database structure: `php bin/console doctrine:migrations:migrate`
-- Build frontend assets: `npm install && npm run dev`
-
-Starting the server:
-
-1. Install Symfony CLI: `wget https://get.symfony.com/cli/installer -O - | bash`
-2. Check the requirements: `symfony check:requirements`
-3. Install dependencies: `composer install`
-4. Dump `.env` into `.env.local.php` via: `composer dump-env dev`
-5. _Optionally:_ Increase verbosity log level in: `config/packages/monolog.yaml` in the `when@dev` section: `level: debug` (instead of `level: info`),
-6. Clear cache: `APP_ENV=dev APP_DEBUG=1 php bin/console cache:clear -n`
-7. Start Mbin: `symfony server:start`
-8. Go to: [http://127.0.0.1:8000](http://127.0.0.1:8000/)
-
-This will give you a minimal working frontend with PostgreSQL setup. Keep in mind: this will _not_ start federating, for that you also need to setup Mercure to test the full Mbin setup.
-
-_Optionally:_ you could also setup RabbitMQ, but the Doctrine messenger configuration will be sufficient for local development.
-
-More info: [Admin guide](docs/admin_guide.md) and [Symfony Local Web Server](https://symfony.com/doc/current/setup/symfony_server.html)
-
-### Linting
-
-Install tooling via:
-
-```sh
-composer -d tools install
-```
-
-Try to automatically fix linting errors:
-
-```sh
-tools/vendor/bin/php-cs-fixer fix
-```
-
-## Federation
-
-### Official Documents
-
-- [ActivityPub standard](https://www.w3.org/TR/activitypub/)
-- [ActivityPub vocabulary](https://www.w3.org/TR/activitystreams-vocabulary/)
-- [Activity Streams](https://www.w3.org/TR/activitystreams-core/)
-
-### Unofficial Sources
-
-- [A highly opinionated guide to learning about ActivityPub](https://tinysubversions.com/notes/reading-activitypub/)
-- [ActivityPub as it has been understood](https://flak.tedunangst.com/post/ActivityPub-as-it-has-been-understood)
-- [Schema Generator 3: A Step Towards Redecentralizing the Web!](https://dunglas.fr/2021/01/schema-generator-3-a-step-towards-redecentralizing-the-web/)
-- [API Platform ActivityPub](https://github.com/api-platform/activity-pub)
 
 ## Languages
 
@@ -216,6 +309,7 @@ Following languages are currently supported/translated:
 
 - Bulgarian
 - Chinese
+- Danish
 - Dutch
 - English
 - Esperanto
@@ -226,6 +320,7 @@ Following languages are currently supported/translated:
 - Japanese
 - Polish
 - Portuguese
+- Portuguese (Brazil)
 - Russian
 - Spanish
 - Turkish
@@ -234,7 +329,7 @@ Following languages are currently supported/translated:
 ## Credits
 
 - [grumpyDev](https://karab.in/u/grumpyDev): icons, kbin-theme
-- [Emma](https://gitlab.com/postmill/Postmill): Postmill
+- [Emma](https://codeberg.org/LItiGiousemMA/Postmill): Postmill
 - [Ernest](https://github.com/ernestwisniewski): Kbin
 
 ## License

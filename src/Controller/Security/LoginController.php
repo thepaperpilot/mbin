@@ -18,13 +18,13 @@ class LoginController extends AbstractController
     public function __invoke(AuthenticationUtils $utils, Request $request): Response
     {
         if ($user = $this->getUser()) {
-            return $this->redirectToRoute($user->homepage);
+            return $this->redirectToRoute('front');
         }
 
         $error = $utils->getLastAuthenticationError();
         $lastUsername = $utils->getLastUsername();
 
-        return $this->render('user/login.html.twig', ['last_username' => $lastUsername, 'error' => $error, 'not_sso_only_mode' => !$this->getParameter('sso_only_mode')]);
+        return $this->render('user/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
 
     public function consent(Request $request, EntityManagerInterface $entityManager): Response

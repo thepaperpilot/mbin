@@ -8,7 +8,6 @@ use App\Entity\Contracts\ActivityPubActivityInterface;
 use App\Entity\Contracts\ContentInterface;
 use App\Entity\Contracts\FavouriteInterface;
 use App\Entity\Contracts\ReportInterface;
-use App\Entity\Contracts\TagInterface;
 use App\Entity\Contracts\VisibilityInterface;
 use App\Entity\Contracts\VotableInterface;
 use App\Entity\Traits\ActivityPubActivityTrait;
@@ -36,7 +35,7 @@ use Webmozart\Assert\Assert;
 #[Index(columns: ['last_active'], name: 'entry_comment_last_active_at_idx')]
 #[Index(columns: ['created_at'], name: 'entry_comment_created_at_idx')]
 #[Index(columns: ['body_ts'], name: 'entry_comment_body_ts_idx')]
-class EntryComment implements VotableInterface, VisibilityInterface, ReportInterface, FavouriteInterface, TagInterface, ActivityPubActivityInterface
+class EntryComment implements VotableInterface, VisibilityInterface, ReportInterface, FavouriteInterface, ActivityPubActivityInterface
 {
     use VotableTrait;
     use VisibilityTrait;
@@ -47,7 +46,7 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
     }
 
     #[ManyToOne(targetEntity: User::class, inversedBy: 'entryComments')]
-    #[JoinColumn(nullable: false)]
+    #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
     public User $user;
     #[ManyToOne(targetEntity: Entry::class, inversedBy: 'comments')]
     #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -62,7 +61,7 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
     #[JoinColumn(nullable: true, onDelete: 'CASCADE')]
     public ?EntryComment $parent = null;
     #[ManyToOne(targetEntity: EntryComment::class, inversedBy: 'nested')]
-    #[JoinColumn(nullable: true)]
+    #[JoinColumn(nullable: true, onDelete: 'CASCADE')]
     public ?EntryComment $root = null;
     #[Column(type: 'text', length: 4500)]
     public ?string $body = null;
@@ -76,14 +75,12 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
     public ?\DateTime $lastActive = null;
     #[Column(type: 'string', nullable: true)]
     public ?string $ip = null;
-    #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
-    public ?array $tags = null;
     #[Column(type: 'json', nullable: true)]
     public ?array $mentions = null;
-    #[OneToMany(mappedBy: 'parent', targetEntity: EntryComment::class, orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'parent', targetEntity: EntryComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[OrderBy(['createdAt' => 'ASC'])]
     public Collection $children;
-    #[OneToMany(mappedBy: 'root', targetEntity: EntryComment::class, orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'root', targetEntity: EntryComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[OrderBy(['createdAt' => 'ASC'])]
     public Collection $nested;
     #[OneToMany(mappedBy: 'comment', targetEntity: EntryCommentVote::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
@@ -94,6 +91,8 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
     public Collection $favourites;
     #[OneToMany(mappedBy: 'entryComment', targetEntity: EntryCommentCreatedNotification::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $notifications;
+    #[OneToMany(mappedBy: 'entryComment', targetEntity: HashtagLink::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    public Collection $hashtags;
     #[Id]
     #[GeneratedValue]
     #[Column(type: 'integer')]
@@ -233,11 +232,6 @@ class EntryComment implements VotableInterface, VisibilityInterface, ReportInter
             ->where(Criteria::expr()->eq('user', $user));
 
         return $this->favourites->matching($criteria)->count() > 0;
-    }
-
-    public function getTags(): array
-    {
-        return array_values($this->tags ?? []);
     }
 
     public function __sleep()

@@ -9,6 +9,7 @@ use App\Entity\Settings;
 use App\Repository\SettingsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\Pure;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class SettingsManager
 {
@@ -17,6 +18,7 @@ class SettingsManager
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SettingsRepository $repository,
+        private readonly RequestStack $requestStack,
         private readonly string $kbinDomain,
         private readonly string $kbinTitle,
         private readonly string $kbinMetaTitle,
@@ -32,8 +34,8 @@ class SettingsManager
         private readonly bool $kbinHeaderLogo,
         private readonly bool $kbinCaptchaEnabled,
         private readonly bool $kbinFederationPageEnabled,
-        private readonly bool $mbinSidebarSectionsLocalOnly,
         private readonly bool $kbinAdminOnlyOauthClients,
+        private readonly bool $mbinSsoOnlyMode,
     ) {
         if (!self::$dto) {
             $results = $this->repository->findAll();
@@ -62,11 +64,16 @@ class SettingsManager
                 $this->find($results, 'KBIN_BANNED_INSTANCES') ?? [],
                 $this->find($results, 'KBIN_HEADER_LOGO', FILTER_VALIDATE_BOOLEAN) ?? $this->kbinHeaderLogo,
                 $this->find($results, 'KBIN_CAPTCHA_ENABLED', FILTER_VALIDATE_BOOLEAN) ?? $this->kbinCaptchaEnabled,
-                $this->find($results, 'KBIN_MERCURE_ENABLED', FILTER_VALIDATE_BOOLEAN) ?? true,
+                $this->find($results, 'KBIN_MERCURE_ENABLED', FILTER_VALIDATE_BOOLEAN) ?? false,
                 $this->find($results, 'KBIN_FEDERATION_PAGE_ENABLED', FILTER_VALIDATE_BOOLEAN) ?? $this->kbinFederationPageEnabled,
                 $this->find($results, 'KBIN_ADMIN_ONLY_OAUTH_CLIENTS', FILTER_VALIDATE_BOOLEAN) ?? $this->kbinAdminOnlyOauthClients,
+                $this->find($results, 'MBIN_SSO_ONLY_MODE', FILTER_VALIDATE_BOOLEAN) ?? $this->mbinSsoOnlyMode,
+                $this->find($results, 'MBIN_PRIVATE_INSTANCE', FILTER_VALIDATE_BOOLEAN) ?? false,
                 $this->find($results, 'KBIN_FEDERATED_SEARCH_ONLY_LOGGEDIN', FILTER_VALIDATE_BOOLEAN) ?? true,
-                $this->find($results, 'MBIN_SIDEBAR_SECTIONS_LOCAL_ONLY', FILTER_VALIDATE_BOOLEAN) ?? $this->mbinSidebarSectionsLocalOnly
+                $this->find($results, 'MBIN_SIDEBAR_SECTIONS_LOCAL_ONLY', FILTER_VALIDATE_BOOLEAN) ?? false,
+                $this->find($results, 'MBIN_SSO_REGISTRATIONS_ENABLED', FILTER_VALIDATE_BOOLEAN) ?? true,
+                $this->find($results, 'MBIN_RESTRICT_MAGAZINE_CREATION', FILTER_VALIDATE_BOOLEAN) ?? false,
+                $this->find($results, 'MBIN_SSO_SHOW_FIRST', FILTER_VALIDATE_BOOLEAN) ?? false
             );
         }
     }
@@ -147,5 +154,12 @@ class SettingsManager
     public static function getValue(string $name): string
     {
         return self::$dto->{$name};
+    }
+
+    public function getLocale(): string
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        return $request->cookies->get('kbin_lang') ?? $request->getLocale() ?? $this->get('KBIN_DEFAULT_LANG');
     }
 }

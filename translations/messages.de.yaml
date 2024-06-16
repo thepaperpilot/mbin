@@ -44,7 +44,6 @@ profile: Profil
 article: Thema
 type.link: Link
 thread: Thema
-views: Aufrufe
 no_comments: Keine Kommentare
 owner: Eigentümer
 threads: Themen
@@ -229,12 +228,11 @@ report: Melden
 share: Teilen
 copy_url: Mbin URL kopieren
 share_on_fediverse: Im Fediverse teilen
-go_to_original_instance: Auf der Original-Instanz weiterstöbern.
+go_to_original_instance: Auf der Original-Instanz anzeigen
 up_vote: Boost
 down_vote: Reduzieren
-tags: Stichworte
+tags: Tags
 followers: Follower
-ratio: Verhältnis
 copy_url_to_fediverse: Original-URL kopieren
 blocked: Geblockt
 reports: Meldungen
@@ -325,12 +323,11 @@ random_magazines: Zufällige Magazine
 random_entries: Zufällige Themen
 related_entries: Verwandte Themen
 delete_account: Konto löschen
-delete_account_request_send: Deine Anfrage um dein Konto zu löschen wurde abgeschickt.
 auto_preview: Automatische Medienvorschau
 inactive: Inaktiv
 mod_remove_your_thread: Ein Moderator hat dein Thema entfernt
 mod_log_alert: WARNUNG - Der Modlog kann unangenehme oder verstörende Inhalte enthalten,
-  welche von Moderatoren entfernt wurden. Bitte bedenke, was du tust.
+  welche von Moderatoren entfernt wurden. Bitte bedenke was du tust.
 removed_thread_by: hat ein Thema entfernt, erstellt von
 restored_thread_by: hat ein Thema wiederhergestellt, erstellt von
 removed_comment_by: hat einen Kommentar entfernt, erstellt von
@@ -370,7 +367,7 @@ kbin_promo_desc: '%link_start%Klone das Repo%link_end% und erweitere das Fediver
 browsing_one_thread: Du siehst nur Inhalte aus einem Thema in dieser Diskussion. Alle
   Kommentare sind auf der Beitragsseite verfügbar.
 boost: Boost
-icon: Icon
+icon: Symbol
 magazine_panel: Magazin Ansicht
 ban: Sperre
 bans: Sperren
@@ -425,16 +422,11 @@ toolbar.ordered_list: Geordnete Liste
 your_account_is_not_active: Dein Profil wurde noch nicht aktiviert. Bitte prüfe deine
   E-Mails und klicke den Aktivierungslink um fortzufahren. Falls du keine Mail erhalten
   hast frage <a href="%link_target%">eine neue Aktivierungsmail</a> an.
-your_account_has_been_banned: E-Mails für Anweisungen zur Kontoaktivierung oder <a
-  href="%link_target%">fordere eine neue E-Mail zur Aktivierung an</a>
+your_account_has_been_banned: Dein Konto wurde gesperrt
 federation_page_enabled: Föderationsseite aktiviert
 federation_page_disallowed_description: Instanzen mit denen wir nicht föderieren
 federation_page_allowed_description: Bekannte Instanzen mit denen wir föderieren
 federated_search_only_loggedin: Föderierte Suche ist eingeschränkt wenn nicht angemeldet
-request_account_deletion_title: Kontolöschung
-request_account_deletion_description: Der Administrator wird davon benachrichtigt,
-  dass du dein Konto löschen möchtest.
-request_account_deletion_button: Kontolöschung anfordern
 more_from_domain: Mehr von der Domäne
 resend_account_activation_email_error: Es gab ein Problem bei der Bearbeitung der
   Anfrage. Eventuell gibt es keinen Account der mit diese E-Mail assoziiert wird oder
@@ -476,7 +468,7 @@ subscription_sort: Sortierung
 unblock: Entblockieren
 oauth.consent.grant_permissions: Gebe Berechtigungen
 oauth2.grant.moderate.magazine.ban.delete: Nutzer in deinen moderierten Magazinen
-  entbannen.
+  entsperren.
 subscriptions_in_own_sidebar: In eigener Seitenleiste
 subscription_sidebar_pop_out_left: Nach links in eigene Seitenleiste verschieben
 subscription_sidebar_pop_out_right: Nach rechts in eigene Seitenleiste verschieben
@@ -508,8 +500,6 @@ delete_content_desc: Lösche den Inhalt des Users, aber behalte die Antworten an
   Nutzer in den erstellten Themen, Beiträgen und Kommentaren.
 magazine_theme_appearance_custom_css: Eigenes CSS das angewendet wird wenn Inhalte
   innerhalb deines Magazins angeschaut werden.
-purge_account_desc: Lösche den Account endgültig, inklusive aller Antworten von anderen
-  Nutzern in den erstellten Themen, Beiträgen und Kommentaren.
 2fa.backup_codes.help: Du kannst diese Code nutzen wenn du keinen Zugriff auf dein
   Zwei-Faktor-Authentifizierung Gerät oder deine App hast. Die Codes werden dir <strong>nicht
   noch einmal gezeigt werden</strong> und du kannst jeden Code <strong>nur ein einziges
@@ -621,7 +611,7 @@ oauth2.grant.moderate.entry.all: Moderiere Themen in deinen moderierten Magazine
 oauth2.grant.entry_comment.all: Erstelle, Bearbeite oder Lösche deine Kommentare in
   Themen und favorisiere, booste oder melde jeden Kommentar in einem Thema.
 oauth2.grant.entry_comment.delete: Lösche deine existierenden Kommentare in Themen.
-delete_account_desc: Lösche den Account, aber behalte Antworten andere Nutzer in den
+delete_account_desc: Lösche den Account, inklusive Antworten anderer Nutzer in den
   erstellten Themen, Beiträgen und Kommentaren.
 subject_reported_exists: Dieser Inhalt wurde bereits gemeldet.
 oauth2.grant.moderate.entry_comment.set_adult: Kennzeichne Kommentare in Themen in
@@ -737,7 +727,7 @@ oauth2.grant.moderate.magazine_admin.badges: Erstelle oder Entferne Abzeichen in
   eigenen Magazinen.
 edit_my_profile: Mein Profil bearbeiten
 user_badge_moderator: Mod
-flash_account_settings_changed: Die Kontoeinstellungen wurden erfolgreich geändert.
+flash_account_settings_changed: Deine Konto Einstellungen wurden erfolgreich geändert.
   Du musst dich erneut anmelden.
 close: Schließen
 restore_magazine: Magazin wiederherstellen
@@ -789,7 +779,6 @@ flash_comment_new_success: Kommentar wurde erfolgreich erstellt.
 flash_user_settings_general_error: Nutzer Einstellungen konnten nicht gespeichert
   werden.
 account_is_suspended: Dieses Nutzerkonto ist suspendiert.
-delete_account_request_revoke: Deine Anfrage auf Kontolöschung wurde zurückgezogen.
 user_suspend_desc: Dein Konto suspendieren versteckt deine Inhalte auf der Instanz,
   löscht diese aber nicht permanent, du kannst die Inhalte jederzeit wiederherstellen.
 ownership_requests: Eigentümer Anfragen
@@ -812,7 +801,6 @@ change_my_avatar: Meinen Avatar ändern
 flash_user_edit_profile_success: Nutzer Profil Einstellungen erfolgreich gespeichert.
 flash_user_settings_general_success: Nutzer Einstellungen erfolgreich gespeichert.
 remove_subscriptions: Abonnements entfernen
-request_account_deletion_revoke_button: Anforderung zur Kontolöschung zurückziehen.
 delete_magazine: Magazin löschen
 sensitive_hide: Klicke zum verstecken
 request_magazine_ownership: Magazin Eigentümerschaft beantragen
@@ -831,3 +819,55 @@ menu: Menü
 all_time: Gesamt
 details: Details
 spoiler: Spoiler
+sso_registrations_enabled: SSO Registrierung aktiviert
+marked_for_deletion: für Löschung markiert
+marked_for_deletion_at: für Löschung am %date% markiert
+subscribe_for_updates: Abonniere um Updates zu erhalten.
+sidebar_sections_local_only: Beschränke "Zufällige X" und "Aktive Nutzer" Abschnitte
+  auf lokale Inhalte
+account_deletion_title: Kontolöschung
+account_deletion_description: Dein Konto wird in 30 Tagen gelöscht außer du entscheidest
+  dich dein Konto sofort zu löschen. Das Konto kann nicht wiederhergestellt werden
+  sobald es gelöscht ist.
+account_deletion_button: Lösche Konto
+account_deletion_immediate: Sofort Löschen
+remove_schedule_delete_account: Entferne geplante Löschung
+remove_schedule_delete_account_desc: Entfernt die geplante Löschung. Aller Inhalt
+  wird wieder verfügbar sein und der Nutzer wird sich wieder anmelden können.
+disconnected_magazine_info: Dieses Magazin erhält keine Updates (letzte Aktivität
+  vor %days% Tage(n)).
+always_disconnected_magazine_info: Dieses Magazin erhält keine Updates.
+schedule_delete_account: Plane Löschung
+schedule_delete_account_desc: Plane die Löschung des Kontos in 30 Tagen. Dies wird
+  den Nutzer und deren Inhalt verstecken und die Anmeldung verhindern.
+sso_registrations_enabled.error: Neue Konto Registrierung mit Identitätsmanager von
+  Drittanbietern sind momentan deaktiviert.
+show: Zeige
+hide: Verstecke
+edited: Bearbeitet
+filter_by_federation: 'Nach Föderierungsstatus filtern'
+auto: 'Automatisch'
+filter_labels: 'Filter Beschreibung'
+restrict_magazine_creation: 'Erstellung lokaler Magazine auf Admins und globale Mods
+  beschränken'
+sort_by: 'Sortieren nach'
+filter_by_subscription: 'Nach Abonnements filtern'
+related_entry: Zugehörig
+tag: Hashtag
+unban: Sperre aufheben
+ban_hashtag_btn: Hashtag Sperren
+unban_hashtag_btn: Hashtag Sperre Aufheben
+private_instance: Nutzer zur Anmeldung zwingen um auf Inhalte zugreifen zu können
+flash_thread_tag_banned_error: Thema konnte nicht erstellt werden. Der Inhalt ist
+  nicht erlaubt.
+sso_only_mode: Anmeldung und Registrierung auf SSO Methoden beschränken
+magazine_log_mod_added: hat einen Moderator hinzugefügt
+magazine_log_mod_removed: hat einen Moderator entfernt
+ban_hashtag_description: Durch das Sperren eines Hashtags wird verhindert, dass Beiträge
+  mit diesem Hashtag erstellt werden. Außerdem werden vorhandene Beiträge mit diesem
+  Hashtag ausgeblendet.
+unban_hashtag_description: Wenn Sie eine Hashtag Sperre aufheben, können wieder Beiträge
+  mit diesem Hashtag erstellt werden. Vorhandene Beiträge mit diesem Hashtag werden
+  nicht mehr ausgeblendet.
+sso_show_first: SSO als erstes auf der Anmeldungs- und Registrierungsseite anzeigen
+continue_with: Weiter mit

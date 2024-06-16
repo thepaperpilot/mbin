@@ -13,6 +13,7 @@ use App\Entity\DomainBlock;
 use App\Entity\DomainSubscription;
 use App\Entity\Entry;
 use App\Entity\EntryFavourite;
+use App\Entity\HashtagLink;
 use App\Entity\Magazine;
 use App\Entity\MagazineBlock;
 use App\Entity\MagazineSubscription;
@@ -22,7 +23,6 @@ use App\Entity\UserBlock;
 use App\Entity\UserFollow;
 use App\PageView\EntryPageView;
 use App\Pagination\AdapterFactory;
-use App\Repository\Contract\TagRepositoryInterface;
 use App\Service\SettingsManager;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ArrayParameterType;
@@ -44,7 +44,7 @@ use Symfony\Contracts\Cache\ItemInterface;
  * @method Entry[]    findAll()
  * @method Entry[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class EntryRepository extends ServiceEntityRepository implements TagRepositoryInterface
+class EntryRepository extends ServiceEntityRepository
 {
     public const SORT_DEFAULT = 'hot';
     public const TIME_DEFAULT = Criteria::TIME_ALL;
@@ -86,6 +86,7 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
             ->where('e.visibility = :visibility')
             ->andWhere('m.visibility = :visible')
             ->andWhere('u.visibility = :visible')
+            ->andWhere('u.isDeleted = false')
             ->join('e.magazine', 'm')
             ->join('e.user', 'u')
             ->leftJoin('e.domain', 'd');
@@ -106,6 +107,7 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
         $this->addTimeClause($qb, $criteria);
         $this->addStickyClause($qb, $criteria);
         $this->filter($qb, $criteria);
+        $this->addBannedHashtagClause($qb);
 
         return $qb;
     }
@@ -131,6 +133,22 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
         }
     }
 
+    private function addBannedHashtagClause(QueryBuilder $qb): void
+    {
+        $dql = $this->getEntityManager()->createQueryBuilder()
+            ->select('hl2')
+            ->from(HashtagLink::class, 'hl2')
+            ->join('hl2.hashtag', 'h2')
+            ->where('h2.banned = true')
+            ->andWhere('hl2.entry = e')
+            ->getDQL();
+        $qb->andWhere(
+            $qb->expr()->not(
+                $qb->expr()->exists($dql)
+            )
+        );
+    }
+
     private function filter(QueryBuilder $qb, EntryPageView $criteria): QueryBuilder
     {
         $user = $this->security->getUser();
@@ -149,13 +167,16 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
                 ->setParameter('user', $criteria->user);
         }
 
-        if ($criteria->type) {
+        if ($criteria->type and 'all' !== $criteria->type) {
             $qb->andWhere('e.type = :type')
                 ->setParameter('type', $criteria->type);
         }
 
         if ($criteria->tag) {
-            $qb->andWhere("JSONB_CONTAINS(e.tags, '\"".$criteria->tag."\"') = true");
+            $qb->andWhere('t.tag = :tag')
+                ->join('e.hashtags', 'h')
+                ->join('h.hashtag', 't')
+                ->setParameter('tag', $criteria->tag);
         }
 
         if ($criteria->domain) {
@@ -323,16 +344,22 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
         $qb = $this->createQueryBuilder('e');
 
         return $qb
-            ->andWhere("JSONB_CONTAINS(e.tags, '\"".$tag."\"') = true")
             ->andWhere('e.visibility = :visibility')
             ->andWhere('m.visibility = :visibility')
             ->andWhere('u.visibility = :visibility')
+            ->andWhere('u.isDeleted = false')
             ->andWhere('m.isAdult = false')
             ->andWhere('e.isAdult = false')
+            ->andWhere('h.tag = :tag')
             ->join('e.magazine', 'm')
             ->join('e.user', 'u')
+            ->join('e.hashtags', 'hl')
+            ->join('hl.hashtag', 'h')
             ->orderBy('e.createdAt', 'DESC')
-            ->setParameters(['visibility' => VisibilityInterface::VISIBILITY_VISIBLE])
+            ->setParameters([
+                'visibility' => VisibilityInterface::VISIBILITY_VISIBLE,
+                'tag' => $tag,
+            ])
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
@@ -346,6 +373,7 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
             ->andWhere('e.visibility = :visibility')
             ->andWhere('m.visibility = :visibility')
             ->andWhere('u.visibility = :visibility')
+            ->andWhere('u.isDeleted = false')
             ->andWhere('m.isAdult = false')
             ->andWhere('e.isAdult = false')
             ->join('e.magazine', 'm')
@@ -367,6 +395,7 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
             ->andWhere('e.visibility = :visibility')
             ->andWhere('m.visibility = :visibility')
             ->andWhere('u.visibility = :visibility')
+            ->andWhere('u.isDeleted = false')
             ->andWhere('m.isAdult = false');
         if ($this->settingsManager->get('MBIN_SIDEBAR_SECTIONS_LOCAL_ONLY')) {
             $qb = $qb->andWhere('m.apId IS NULL');
@@ -377,14 +406,6 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
             ->orderBy('e.createdAt', 'DESC')
             ->setParameters(['visibility' => VisibilityInterface::VISIBILITY_VISIBLE])
             ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findWithTags(): array
-    {
-        return $this->createQueryBuilder('e')
-            ->where('e.tags IS NOT NULL')
             ->getQuery()
             ->getResult();
     }
@@ -436,6 +457,8 @@ class EntryRepository extends ServiceEntityRepository implements TagRepositoryIn
         $qb->andWhere('e.id != :id')
             ->andWhere('m.visibility = :visibility')
             ->andWhere('e.visibility = :visibility')
+            ->andWhere('u.isDeleted = false')
+            ->innerJoin('e.user', 'u')
             ->join('e.magazine', 'm')
             ->setParameter('visibility', VisibilityInterface::VISIBILITY_VISIBLE)
             ->setParameter('id', $entry->getId())

@@ -8,6 +8,7 @@
     <div class="settings-section">
         {{ component('settings_row_enum', {label: 'sidebar_position'|trans, settingsKey: 'KBIN_GENERAL_SIDEBAR_POSITION', values: [ {name: 'left'|trans , value: 'LEFT'}, {name: 'right'|trans , value: 'RIGHT' } ], defaultValue: 'RIGHT' } ) }}
         {{ component('settings_row_enum', {label: 'page_width'|trans, settingsKey: 'KBIN_PAGE_WIDTH', values: [ {name: 'page_width_max'|trans , value: 'MAX'}, {name: 'page_width_auto'|trans , value: 'AUTO' }, {name: 'page_width_fixed'|trans , value: 'FIXED' } ], defaultValue: 'FIXED', class: 'width-setting' } ) }}
+        {{ component('settings_row_enum', {label: 'filter_labels'|trans, settingsKey: 'KBIN_GENERAL_FILTER_LABELS', values: [ {name: 'on'|trans , value: 'ON'}, {name: 'auto'|trans , value: 'AUTO' }, {name: 'off'|trans , value: 'OFF' } ], defaultValue: 'ON' } ) }}
         {% if kbin_mercure_enabled() %}
             {{ component('settings_row_switch', {label: 'dynamic_lists'|trans, settingsKey: 'KBIN_GENERAL_DYNAMIC_LISTS'}) }}
         {% endif %}
@@ -49,5 +50,10 @@
     <div class="settings-section">
         {{ component('settings_row_enum', {label: 'comment_reply_position'|trans, help: 'comment_reply_position_help'|trans, settingsKey: 'KBIN_COMMENTS_REPLY_POSITION', values: [ {name: 'position_top'|trans , value: 'TOP'}, {name: 'position_bottom'|trans , value: 'BOTTOM' } ], defaultValue: 'TOP' } ) }}
         {{ component('settings_row_switch', {label: 'show_avatars_on_comments'|trans, help: 'show_avatars_on_comments_help'|trans, settingsKey: 'KBIN_COMMENTS_SHOW_USER_AVATAR', defaultValue: true}) }}
+    </div>
+    <strong>{{ 'mod_log'|trans }}</strong>
+    <div class="settings-section">
+        {{ component('settings_row_switch', {label: 'show_users_avatars'|trans, settingsKey: 'MBIN_MODERATION_LOG_SHOW_USER_AVATARS', defaultValue: false}) }}
+        {{ component('settings_row_switch', {label: 'show_magazines_icons'|trans, settingsKey: 'MBIN_MODERATION_LOG_SHOW_MAGAZINE_ICONS', defaultValue: false}) }}
     </div>
 </div>

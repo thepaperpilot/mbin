@@ -15,6 +15,7 @@ use App\Event\Post\PostCreatedEvent;
 use App\Event\Post\PostDeletedEvent;
 use App\Event\Post\PostEditedEvent;
 use App\Event\Post\PostRestoredEvent;
+use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
 use App\Factory\PostFactory;
 use App\Message\DeleteImageMessage;
@@ -25,6 +26,7 @@ use App\Utils\Slugger;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
@@ -35,10 +37,12 @@ use Webmozart\Assert\Assert;
 class PostManager implements ContentManagerInterface
 {
     public function __construct(
+        private readonly LoggerInterface $logger,
         private readonly Slugger $slugger,
         private readonly MentionManager $mentionManager,
         private readonly PostCommentManager $postCommentManager,
         private readonly TagManager $tagManager,
+        private readonly TagExtractor $tagExtractor,
         private readonly PostFactory $factory,
         private readonly EventDispatcherInterface $dispatcher,
         private readonly RateLimiterFactory $postLimiter,
@@ -51,10 +55,20 @@ class PostManager implements ContentManagerInterface
     ) {
     }
 
+    /**
+     * @throws TagBannedException
+     * @throws UserBannedException
+     * @throws TooManyRequestsHttpException
+     * @throws \Exception
+     */
     public function create(PostDto $dto, User $user, $rateLimit = true): Post
     {
         if ($dto->magazine->isBanned($user) || $user->isBanned()) {
             throw new UserBannedException();
+        }
+
+        if ($this->tagManager->isAnyTagBanned($this->tagManager->extract($dto->body))) {
+            throw new TagBannedException();
         }
 
         $post = $this->factory->createFromDto($dto, $user);
@@ -63,10 +77,10 @@ class PostManager implements ContentManagerInterface
         $post->isAdult = $dto->isAdult || $post->magazine->isAdult;
         $post->slug = $this->slugger->slug($dto->body ?? $dto->magazine->name.' '.$dto->image->altText);
         $post->image = $dto->image ? $this->imageRepository->find($dto->image->id) : null;
+        $this->logger->debug('setting image to {imageId}, dto was {dtoImageId}', ['imageId' => $post->image?->getId() ?? 'none', 'dtoImageId' => $dto->image?->id ?? 'none']);
         if ($post->image && !$post->image->altText) {
             $post->image->altText = $dto->imageAlt;
         }
-        $post->tags = $dto->body ? $this->tagManager->extract($dto->body, $post->magazine->name) : null;
         $post->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
         $post->visibility = $dto->visibility;
         $post->apId = $dto->apId;
@@ -80,6 +94,8 @@ class PostManager implements ContentManagerInterface
 
         $this->entityManager->persist($post);
         $this->entityManager->flush();
+
+        $this->tagManager->updatePostTags($post, $this->tagExtractor->extract($post->body) ?? []);
 
         $this->dispatcher->dispatch(new PostCreatedEvent($post));
 
@@ -98,7 +114,7 @@ class PostManager implements ContentManagerInterface
         if ($dto->image) {
             $post->image = $this->imageRepository->find($dto->image->id);
         }
-        $post->tags = $dto->body ? $this->tagManager->extract($dto->body, $post->magazine->name) : null;
+        $this->tagManager->updatePostTags($post, $this->tagExtractor->extract($dto->body) ?? []);
         $post->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
         $post->visibility = $dto->visibility;
         $post->editedAt = new \DateTimeImmutable('@'.time());
@@ -109,7 +125,7 @@ class PostManager implements ContentManagerInterface
         $this->entityManager->flush();
 
         if ($oldImage && $post->image !== $oldImage) {
-            $this->bus->dispatch(new DeleteImageMessage($oldImage->filePath));
+            $this->bus->dispatch(new DeleteImageMessage($oldImage->getId()));
         }
 
         $this->dispatcher->dispatch(new PostEditedEvent($post));
@@ -119,7 +135,9 @@ class PostManager implements ContentManagerInterface
 
     public function delete(User $user, Post $post): void
     {
-        if ($user->apDomain && $user->apDomain !== parse_url($post->apId, PHP_URL_HOST)) {
+        if ($user->apDomain && $user->apDomain !== parse_url($post->apId ?? '', PHP_URL_HOST) && !$post->magazine->userIsModerator($user)) {
+            $this->logger->info('Got a delete activity from user {u}, but they are not from the same instance as the deleted post and they are not a moderator on {m]', ['u' => $user->apId, 'm' => $post->magazine->apId ?? $post->magazine->name]);
+
             return;
         }
 
@@ -153,7 +171,7 @@ class PostManager implements ContentManagerInterface
     {
         $this->dispatcher->dispatch(new PostBeforePurgeEvent($post, $user));
 
-        $image = $post->image?->filePath;
+        $image = $post->image?->getId();
 
         $sort = new Criteria(null, ['createdAt' => Criteria::DESC]);
         foreach ($post->comments->matching($sort) as $comment) {
@@ -203,7 +221,7 @@ class PostManager implements ContentManagerInterface
 
     public function detachImage(Post $post): void
     {
-        $image = $post->image->filePath;
+        $image = $post->image->getId();
 
         $post->image = null;
 

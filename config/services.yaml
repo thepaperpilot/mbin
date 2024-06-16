@@ -34,6 +34,10 @@ parameters:
     hcaptcha_site_key: "%env(resolve:HCAPTCHA_SITE_KEY)%"
     hcaptcha_secret: "%env(resolve:HCAPTCHA_SECRET)%"
 
+    oauth_azure_id: "%env(default::OAUTH_AZURE_ID)%"
+    oauth_azure_secret: "%env(OAUTH_AZURE_SECRET)%"
+    oauth_azure_tenant: "%env(OAUTH_AZURE_TENANT)%"
+
     oauth_facebook_id: "%env(default::OAUTH_FACEBOOK_ID)%"
     oauth_facebook_secret: "%env(OAUTH_FACEBOOK_SECRET)%"
 
@@ -43,15 +47,25 @@ parameters:
     oauth_github_id: "%env(default::OAUTH_GITHUB_ID)%"
     oauth_github_secret: "%env(OAUTH_GITHUB_SECRET)%"
 
+    oauth_privacyportal_id: "%env(default::OAUTH_PRIVACYPORTAL_ID)%"
+    oauth_privacyportal_secret: "%env(OAUTH_PRIVACYPORTAL_SECRET)%"
+
     oauth_keycloak_id: "%env(default::OAUTH_KEYCLOAK_ID)%"
     oauth_keycloak_secret: "%env(OAUTH_KEYCLOAK_SECRET)%"
     oauth_keycloak_uri: "%env(OAUTH_KEYCLOAK_URI)%"
     oauth_keycloak_realm: "%env(OAUTH_KEYCLOAK_REALM)%"
     oauth_keycloak_version: "%env(OAUTH_KEYCLOAK_VERSION)%"
 
+    oauth_simplelogin_id: "%env(default::OAUTH_SIMPLELOGIN_ID)%"
+    oauth_simplelogin_secret: "%env(OAUTH_SIMPLELOGIN_SECRET)%"
+
     oauth_zitadel_id: "%env(default::OAUTH_ZITADEL_ID)%"
     oauth_zitadel_secret: "%env(OAUTH_ZITADEL_SECRET)%"
     oauth_zitadel_base_url: "%env(OAUTH_ZITADEL_BASE_URL)%"
+
+    oauth_authentik_id: "%env(default::OAUTH_AUTHENTIK_ID)%"
+    oauth_authentik_secret: "%env(OAUTH_AUTHENTIK_SECRET)%"
+    oauth_authentik_base_url: "%env(OAUTH_AUTHENTIK_BASE_URL)%"
 
 
     router.request_context.host: "%env(KBIN_DOMAIN)%"
@@ -59,9 +73,17 @@ parameters:
 
     html5_validation: true
 
-    front_sort_options: top|hot|active|newest|oldest|commented
-    front_time_options: 6h|12h|1d|1w|1m|1y|all|∞
-    stats_type: general|content|views|votes
+    front_sort_options: top|hot|active|newest|oldest|commented # TODO remove fallback after tag rework
+    default_sort_options: top|hot|active|newest|oldest|commented
+    default_time_options: 3h|6h|12h|1d|1w|1m|1y|all|∞
+    default_type_options: article|articles|link|links|video|videos|photo|photos|image|images|all
+    default_subscription_options: sub|fav|mod|all|home
+    default_federation_options: local|all
+    default_content_options: threads|microblog
+
+    comment_sort_options: top|hot|active|newest|oldest
+
+    stats_type: general|content|votes
 
     number_regex: "[1-9][0-9]{0,17}"
     username_regex: '\w{2,25}|!deleted\d+'
@@ -148,7 +170,7 @@ services:
             $kbinCaptchaEnabled: "%env(bool:KBIN_CAPTCHA_ENABLED)%"
             $kbinFederationPageEnabled: "%env(bool:KBIN_FEDERATION_PAGE_ENABLED)%"
             $kbinAdminOnlyOauthClients: "%env(bool:KBIN_ADMIN_ONLY_OAUTH_CLIENTS)%"
-            $mbinSidebarSectionsLocalOnly: "%env(bool:MBIN_SIDEBAR_SECTIONS_LOCAL_ONLY)%"
+            $mbinSsoOnlyMode: "%sso_only_mode%"
 
     # Markdown
     App\Markdown\Factory\EnvironmentFactory:
@@ -171,15 +193,6 @@ services:
               }
         arguments: ["%kbin_default_lang%"]
 
-    # User
-    App\EventListener\UserHomepageListener:
-        tags:
-            - {
-                  name: kernel.event_listener,
-                  event: kernel.request,
-                  priority: 7,
-              }
-
     # Federation
     App\EventListener\FederationStatusListener:
         tags:
@@ -188,7 +201,6 @@ services:
                   event: kernel.controller,
                   priority: -5,
               }
-        arguments: ["%kbin_federation_enabled%"]
 
     App\EventListener\UserActivityListener:
         tags:

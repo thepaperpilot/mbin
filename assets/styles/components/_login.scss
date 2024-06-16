@@ -3,7 +3,7 @@
 .page-reset-password,
 .page-reset-password-email-sent,
 .page-resend-activation-email {
-  .container {
+  #content .container {
     margin: 0 auto;
     max-width: 30rem;
 
@@ -15,28 +15,43 @@
       font-weight: bold;
     }
 
+    .separator {
+      display: none;
+      height: 0;
+    }
+    .separator:has(+ div p), .separator.separator-show {
+      display: block;
+      border: var(--kbin-section-border);
+      height: 0;
+      margin: 20px 30px;
+    }
+
     .actions {
-      margin-top: 3rem;
+      margin-top: 1rem;
       display: block;
     }
 
     .social {
-      display: flex;
-      gap: 2rem;
+      grid-template-columns: repeat(1, 1fr);
+      @include media-breakpoint-up(lg) {
+        &:has(a + a) {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      display: grid;
+      gap: 0.5rem;
       justify-content: center;
-      margin-top: 3rem;
 
       a {
-        align-items: center;
-        display: inline-flex;
-        gap: .5rem;
+        text-align: center;
       }
     }
   }
 }
 
 .page-2fa {
-  .container {
+  #content .container {
     margin: 0 auto;
     max-width: 30rem;
 

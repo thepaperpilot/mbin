@@ -16,6 +16,7 @@ use App\Event\Entry\EntryDeletedEvent;
 use App\Event\Entry\EntryEditedEvent;
 use App\Event\Entry\EntryPinEvent;
 use App\Event\Entry\EntryRestoredEvent;
+use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
 use App\Factory\EntryFactory;
 use App\Message\DeleteImageMessage;
@@ -27,6 +28,7 @@ use App\Utils\UrlCleaner;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
@@ -37,6 +39,8 @@ use Webmozart\Assert\Assert;
 class EntryManager implements ContentManagerInterface
 {
     public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly TagExtractor $tagExtractor,
         private readonly TagManager $tagManager,
         private readonly MentionManager $mentionManager,
         private readonly EntryCommentManager $entryCommentManager,
@@ -55,25 +59,33 @@ class EntryManager implements ContentManagerInterface
     ) {
     }
 
+    /**
+     * @throws TagBannedException
+     * @throws UserBannedException
+     * @throws TooManyRequestsHttpException
+     * @throws \Exception                   if title, body and image are empty
+     */
     public function create(EntryDto $dto, User $user, bool $rateLimit = true): Entry
     {
         if ($dto->magazine->isBanned($user) || $user->isBanned()) {
             throw new UserBannedException();
         }
 
+        if ($this->tagManager->isAnyTagBanned($this->tagManager->extract($dto->body))) {
+            throw new TagBannedException();
+        }
+
+        $this->logger->debug('creating entry from dto');
         $entry = $this->factory->createFromDto($dto, $user);
 
         $entry->lang = $dto->lang;
         $entry->isAdult = $dto->isAdult || $entry->magazine->isAdult;
         $entry->slug = $this->slugger->slug($dto->title);
         $entry->image = $dto->image ? $this->imageRepository->find($dto->image->id) : null;
+        $this->logger->debug('setting image to {imageId}, dto was {dtoImageId}', ['imageId' => $entry->image?->getId() ?? 'none', 'dtoImageId' => $dto->image?->id ?? 'none']);
         if ($entry->image && !$entry->image->altText) {
             $entry->image->altText = $dto->imageAlt;
         }
-        $entry->tags = $dto->tags ? $this->tagManager->extract(
-            implode(' ', array_map(fn ($tag) => str_starts_with($tag, '#') ? $tag : '#'.$tag, $dto->tags)),
-            $entry->magazine->name
-        ) : null;
         $entry->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
         $entry->visibility = $dto->visibility;
         $entry->apId = $dto->apId;
@@ -93,6 +105,8 @@ class EntryManager implements ContentManagerInterface
 
         $this->entityManager->persist($entry);
         $this->entityManager->flush();
+
+        $this->tagManager->updateEntryTags($entry, $this->tagExtractor->extract($entry->body) ?? []);
 
         $this->dispatcher->dispatch(new EntryCreatedEvent($entry));
 
@@ -143,10 +157,8 @@ class EntryManager implements ContentManagerInterface
         if ($dto->image) {
             $entry->image = $this->imageRepository->find($dto->image->id);
         }
-        $entry->tags = $dto->tags ? $this->tagManager->extract(
-            implode(' ', array_map(fn ($tag) => str_starts_with($tag, '#') ? $tag : '#'.$tag, $dto->tags)),
-            $entry->magazine->name
-        ) : null;
+        $this->tagManager->updateEntryTags($entry, $this->tagManager->getTagsFromEntryDto($dto));
+
         $entry->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
         $entry->isOc = $dto->isOc;
         $entry->lang = $dto->lang;
@@ -161,7 +173,7 @@ class EntryManager implements ContentManagerInterface
         $this->entityManager->flush();
 
         if ($oldImage && $entry->image !== $oldImage) {
-            $this->bus->dispatch(new DeleteImageMessage($oldImage->filePath));
+            $this->bus->dispatch(new DeleteImageMessage($oldImage->getId()));
         }
 
         $this->dispatcher->dispatch(new EntryEditedEvent($entry));
@@ -171,7 +183,9 @@ class EntryManager implements ContentManagerInterface
 
     public function delete(User $user, Entry $entry): void
     {
-        if ($user->apDomain && $user->apDomain !== parse_url($entry->apId, PHP_URL_HOST)) {
+        if ($user->apDomain && $user->apDomain !== parse_url($entry->apId ?? '', PHP_URL_HOST) && !$entry->magazine->userIsModerator($user)) {
+            $this->logger->info('Got a delete activity from user {u}, but they are not from the same instance as the deleted post and they are not a moderator on {m]', ['u' => $user->apId, 'm' => $entry->magazine->apId ?? $entry->magazine->name]);
+
             return;
         }
 
@@ -205,7 +219,7 @@ class EntryManager implements ContentManagerInterface
     {
         $this->dispatcher->dispatch(new EntryBeforePurgeEvent($entry, $user));
 
-        $image = $entry->image?->filePath;
+        $image = $entry->image?->getId();
 
         $sort = new Criteria(null, ['createdAt' => Criteria::DESC]);
         foreach ($entry->comments->matching($sort) as $comment) {
@@ -252,7 +266,7 @@ class EntryManager implements ContentManagerInterface
 
     public function detachImage(Entry $entry): void
     {
-        $image = $entry->image->filePath;
+        $image = $entry->image->getId();
 
         $entry->image = null;
 

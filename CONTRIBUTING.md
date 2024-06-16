@@ -2,8 +2,22 @@
 
 We always welcome new supporters and contributors. A quick list below of possible ways to contribute to Mbin.
 
-> _Note_:
-> We are all volunteers. Please be nice! ❤
+### Way of Working
+
+Comply with **our version** of [Collective Code Construction Contract (C4)](C4.md) specification. Read this document to understand how we work together and how the development process works at Mbin.
+
+Below some general non-technical agreements and guidelines:
+
+- **Respect for Others**: Treat everyone involved in the project with respect, regardless of their role or level of expertise. Value their opinions and contributions.
+- **Effective Communication**: Encourage clear, concise, and respectful communication among team members. Listen actively and considerately to others' perspectives.
+- **Constructive Feedback**: Provide feedback in a constructive manner, focusing on the improvement of the work rather than criticizing individuals.
+- **Professional Language**: Refrain from using offensive language, including swearing, derogatory remarks, or discriminatory language.
+- **Positive Environment**: Foster a positive and inclusive work environment where everyone feels comfortable expressing their ideas and concerns.
+- **Conflict Resolution**: Address conflicts or disagreements promptly and professionally. Encourage open dialogue and find mutually beneficial solutions.
+- **Team Collaboration**: Encourage collaboration and teamwork, recognizing that everyone brings unique skills and perspectives to the project.
+- **Accountability**: Take responsibility for your actions and commitments. Honor agreements, and communicate openly if there are any challenges or issues.
+- **Appreciation and Recognition**: Acknowledge and appreciate the efforts and achievements of team members. Recognize their contributions publicly and privately.
+- **Embrace Fun and Camaraderie**: Encourage team members to engage in light-hearted conversations, share jokes, and enjoy each other's company. Take breaks to socialize and build relationships beyond the scope of the project.
 
 ## Code
 
@@ -11,19 +25,26 @@ The code is mainly written in PHP using the Symfony framework with Twig templati
 
 With an account on [GitHub](https://github.com) you will be able to [fork this repository](https://github.com/MbinOrg/mbin) and `git clone` the repository locally if you wish.
 
-> _Note_:
-> If you are a contributor with GitHub org rights, you do not need to fork the project, instead you are allowed to use branches.
-
-Always [create a new Pull Request](https://github.com/MbinOrg/mbin/pulls) in GitHub. Be sure to avoid regression, see below for more info about the coding style as well as testing. All tests in the Pull Request should be green!
+> [!Note]
+> If you are a Maintainer with GitHub org admin rights, you do NOT need to fork the project, instead you are allowed to use git branches. See also [C4](C4.md).
 
 ### Coding Style Guide
 
-We use [php-cs-fixer](https://cs.symfony.com/) to automatically fix code style issues according to [Symfony coding standard](https://symfony.com/doc/current/contributing/code/standards.html).  
+We use [php-cs-fixer](https://cs.symfony.com/) to automatically fix code style issues according to [Symfony coding standard](https://symfony.com/doc/current/contributing/code/standards.html).
 It is based on the [PHP-FIG coding standards](https://www.php-fig.org/psr/).
 
 Install PHP-CS-Fixer first: `composer -d tools install`
 
 Then run the following command trying to auto-fix the issues: `./tools/vendor/bin/php-cs-fixer fix`
+
+For JavaScript code inside the `assets/` directory, we use ESLint for linting and potentially fix the code style issues.
+
+Install eslint and its required plugins by: `npm install`.
+
+Run the following command to perform linting: `npm run lint`, or you could use eslint directly by `npx eslint` if needed.
+
+Run the following command to attempt auto-fix linting issues: `npm run lint-fix`, or `npx eslint --fix .`.  
+Note that unlike PHP-CS-Fixer, *not all linting problems could be automatically fixed*, some of these would requires manually fixing them as appropiate, be sure to do those.
 
 ### Tests
 
@@ -63,7 +84,7 @@ SYMFONY_DEPRECATIONS_HELPER=disabled ./bin/phpunit tests/Unit
 
 ### Fixtures
 
-You might want to load random data to database instead of manually adding magazines, users, posts, comments etc.  
+You might want to load random data to database instead of manually adding magazines, users, posts, comments etc.
 To do so, execute: `bin/console doctrine:fixtures:load --append --no-debug`
 
 If you want to do the same but with the Docker setup, execute: `docker compose exec php bin/console doctrine:fixtures:load --append --no-debug` (from the `docker` directory)
@@ -79,7 +100,7 @@ Translations are done in [Weblate](https://hosted.weblate.org/projects/mbin/).
 
 ## Documentation
 
-Documentation is stored at in the [`docs` folder](docs) within git. Create a [new pull request](https://github.com/MbinOrg/mbin/pulls) with changes to the documentation files.
+Documentation is stored at in the [`docs` folder](https://github.com/MbinOrg/mbin/tree/main/docs) within git. Create a [new pull request](https://github.com/MbinOrg/mbin/pulls) with changes to the documentation files.
 
 ## Community
 

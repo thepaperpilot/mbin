@@ -11,7 +11,6 @@ use App\Entity\Contracts\DomainInterface;
 use App\Entity\Contracts\FavouriteInterface;
 use App\Entity\Contracts\RankingInterface;
 use App\Entity\Contracts\ReportInterface;
-use App\Entity\Contracts\TagInterface;
 use App\Entity\Contracts\VisibilityInterface;
 use App\Entity\Contracts\VotableInterface;
 use App\Entity\Traits\ActivityPubActivityTrait;
@@ -33,7 +32,6 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OrderBy;
-use Tchoulom\ViewCounterBundle\Model\ViewCountable;
 use Webmozart\Assert\Assert;
 
 #[Entity(repositoryClass: EntryRepository::class)]
@@ -47,7 +45,7 @@ use Webmozart\Assert\Assert;
 #[Index(columns: ['last_active'], name: 'entry_last_active_at_idx')]
 #[Index(columns: ['body_ts'], name: 'entry_body_ts_idx')]
 #[Index(columns: ['title_ts'], name: 'entry_title_ts_idx')]
-class Entry implements VotableInterface, CommentInterface, DomainInterface, VisibilityInterface, RankingInterface, ReportInterface, FavouriteInterface, ViewCountable, TagInterface, ActivityPubActivityInterface, ContentVisibilityInterface
+class Entry implements VotableInterface, CommentInterface, DomainInterface, VisibilityInterface, RankingInterface, ReportInterface, FavouriteInterface, ActivityPubActivityInterface, ContentVisibilityInterface
 {
     use VotableTrait;
     use RankingTrait;
@@ -72,7 +70,7 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
     public const MAX_BODY_LENGTH = 35000;
 
     #[ManyToOne(targetEntity: User::class, inversedBy: 'entries')]
-    #[JoinColumn(nullable: false)]
+    #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
     public User $user;
     #[ManyToOne(targetEntity: Magazine::class, inversedBy: 'entries')]
     #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -105,8 +103,6 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
     public int $favouriteCount = 0;
     #[Column(type: 'integer', nullable: false)]
     public int $score = 0;
-    #[Column(type: 'integer', nullable: true)]
-    public ?int $views = 0;
     #[Column(type: 'boolean', nullable: false)]
     public bool $isAdult = false;
     #[Column(type: 'boolean', nullable: false)]
@@ -116,30 +112,22 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
     #[Column(type: 'string', nullable: true)]
     public ?string $ip = null;
     #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
-    public ?array $tags = null;
-    #[Column(type: 'json', nullable: true, options: ['jsonb' => true])]
     public ?array $mentions = null;
-    #[OneToMany(mappedBy: 'entry', targetEntity: EntryComment::class, fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'entry', targetEntity: EntryComment::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $comments;
-    #[OneToMany(mappedBy: 'entry', targetEntity: EntryVote::class, cascade: [
-        'persist',
-        'remove',
-    ], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'entry', targetEntity: EntryVote::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     #[OrderBy(['createdAt' => 'DESC'])]
     public Collection $votes;
-    #[OneToMany(mappedBy: 'entry', targetEntity: EntryReport::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'entry', targetEntity: EntryReport::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $reports;
-    #[OneToMany(mappedBy: 'entry', targetEntity: EntryFavourite::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'entry', targetEntity: EntryFavourite::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     #[OrderBy(['createdAt' => 'DESC'])]
     public Collection $favourites;
-    #[OneToMany(mappedBy: 'entry', targetEntity: EntryCreatedNotification::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'entry', targetEntity: EntryCreatedNotification::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $notifications;
-    #[OneToMany(mappedBy: 'entry', targetEntity: ViewCounter::class, cascade: ['remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
-    public Collection $viewCounters;
-    #[OneToMany(mappedBy: 'entry', targetEntity: EntryBadge::class, cascade: [
-        'remove',
-        'persist',
-    ], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'entry', targetEntity: HashtagLink::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    public Collection $hashtags;
+    #[OneToMany(mappedBy: 'entry', targetEntity: EntryBadge::class, cascade: ['remove', 'persist'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     public Collection $badges;
     public array $children = [];
     #[Id]
@@ -177,7 +165,6 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
         $this->reports = new ArrayCollection();
         $this->favourites = new ArrayCollection();
         $this->notifications = new ArrayCollection();
-        $this->viewCounters = new ArrayCollection();
         $this->badges = new ArrayCollection();
 
         $user->addEntry($this);
@@ -317,18 +304,6 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
         return $this;
     }
 
-    public function addViewCounter(ViewCounter $viewCounter): self
-    {
-        $this->viewCounters[] = $viewCounter;
-
-        return $this;
-    }
-
-    public function removeViewCounter(ViewCounter $viewCounter): void
-    {
-        $this->viewCounters->removeElement($viewCounter);
-    }
-
     public function isAuthor(User $user): bool
     {
         return $user === $this->user;
@@ -396,18 +371,6 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
         return $this->user;
     }
 
-    public function getViews(): int
-    {
-        return $this->views;
-    }
-
-    public function setViews($views): self
-    {
-        $this->views = $views;
-
-        return $this;
-    }
-
     public function isAdult(): bool
     {
         return $this->isAdult || $this->magazine->isAdult;
@@ -429,11 +392,6 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
     public function getDescription(): string
     {
         return ''; // @todo get first author comment
-    }
-
-    public function getTags(): array
-    {
-        return array_values($this->tags ?? []);
     }
 
     public function __sleep()

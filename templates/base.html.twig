@@ -1,9 +1,28 @@
+{%- set V_TRUE = constant('App\\Controller\\User\\ThemeSettingsController::TRUE') -%}
+{%- set V_FALSE = constant('App\\Controller\\User\\ThemeSettingsController::FALSE') -%}
+{%- set V_LEFT = constant('App\\Controller\\User\\ThemeSettingsController::LEFT') -%}
+{%- set V_RIGHT = constant('App\\Controller\\User\\ThemeSettingsController::RIGHT') -%}
+{%- set V_FIXED = constant('App\\Controller\\User\\ThemeSettingsController::FIXED') -%}
+{%- set V_LAST_ACTIVE = constant('App\\Controller\\User\\ThemeSettingsController::LAST_ACTIVE') -%}
+
+{%- set FONT_SIZE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_FONT_SIZE'), '100') -%}
+{%- set THEME = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_THEME'), mbin_default_theme()) -%}
+{%- set PAGE_WIDTH = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_PAGE_WIDTH'), V_FIXED) -%}
+{%- set ROUNDED_EDGES = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_ROUNDED_EDGES'), V_TRUE) -%}
+{%- set TOPBAR = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_TOPBAR'), V_FALSE) -%}
+{%- set FIXED_NAVBAR = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_FIXED_NAVBAR'), V_FALSE) -%}
+{%- set SIDEBAR_POSITION = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_SIDEBAR_POSITION'), V_RIGHT) -%}
+{%- set COMPACT = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT'), V_FALSE) -%}
+
+{%- set SUBSCRIPTIONS_SHOW = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SHOW'), V_TRUE) -%}
+{%- set SUBSCRIPTIONS_SEPARATE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR'), V_FALSE) -%}
+{%- set SUBSCRIPTIONS_SAME_SIDE = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE'), V_FALSE) -%}
+{%- set SUBSCRIPTIONS_SORT = app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SORT'), V_LAST_ACTIVE) -%}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}"
-      style="font-size: {{ app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_FONT_SIZE'))
-      ? app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_FONT_SIZE'))~'%'
-      : '100%' }}">
+      style="font-size: {{ FONT_SIZE~'%' }}">
 <head>
+    <meta charset="UTF-8">
     <title>{%- block title -%}{{ kbin_meta_title() }}{%- endblock -%}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,57 +38,31 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ asset('assets/icons/apple-touch-icon.png') }}">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    {% if kbin_header_logo() %}
+    <link rel="preload" href="{{ asset('mbin_logo.svg') }}" as="image">
+    {% endif %}
 
     <link rel="manifest" href="{{ asset('manifest.json') }}"/>
 
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
-        <style>
-            {% include 'components/_details_label.css.twig' %}
-        </style>
+        <link rel="stylesheet" href="{{ path('custom_style', {magazine: magazine.name|default(null)}) }}">
     {% endblock %}
 
     {% block javascripts %}
         {{ encore_entry_script_tags('app') }}
-        {% if kbin_mercure_enabled() %}
-        {#        <script type="application/json" id="mercure-url">{{ mercure()|raw }}</script> #}
-        <script type="application/json" id="mercure-url">{{- 'https://' ~ kbin_domain() ~ '/.well-known/mercure' }}</script>
-        {% endif %}
-        <script>
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register(
-                    '/sw.js'
-                );
-            }
-        </script>
     {% endblock %}
-
-    <script defer data-domain="incremental.social" src="https://plausible.io/js/script.js"></script>
-
-    {% if not app.user or not app.user.ignoreMagazinesCustomCss %}
-        {% if magazine is defined and magazine %}
-            <style>
-                {{ magazine.customCss }}
-            </style>
-        {% endif %}
-    {% endif %}
-    {% if app.user and app.user.customCss %}
-        <style>
-            {{ app.user.customCss }}
-        </style>
-    {% endif %}
 </head>
-<body class="{{ html_classes(app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_THEME'))
-    ? 'theme--'~app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_THEME'))
-    : 'theme--'~mbin_default_theme(), {
-        'rounded-edges': app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_ROUNDED_EDGES')) == false or app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_ROUNDED_EDGES')) is same as 'true',
-        'topbar': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_TOPBAR')) is same as 'true',
-        'fixed-navbar': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_FIXED_NAVBAR')) is same as 'true',
-        'sidebar-left': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_GENERAL_SIDEBAR_POSITION')) is same as constant('App\\Controller\\User\\ThemeSettingsController::LEFT'),
-        'subs-show': app.user is defined and app.user is not same as null and app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SHOW')) is not same as 'false' and app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR')) is same as 'true',
-        'sidebars-same-side': app.user is defined and app.user is not same as null and app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR')) is same as 'true' and app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SIDEBARS_SAME_SIDE')) is same as 'true',
+<body class="{{ html_classes('theme--'~THEME, {
+        'rounded-edges': ROUNDED_EDGES is same as V_TRUE,
+        'topbar': TOPBAR is same as V_TRUE,
+        'fixed-navbar': FIXED_NAVBAR is same as V_TRUE,
+        'sidebar-left': SIDEBAR_POSITION is same as V_LEFT,
+        'subs-show': app.user is defined and app.user is not same as null and SUBSCRIPTIONS_SHOW is not same as V_FALSE and SUBSCRIPTIONS_SEPARATE is same as V_TRUE,
+        'sidebars-same-side': app.user is defined and app.user is not same as null and SUBSCRIPTIONS_SEPARATE is same as V_TRUE and SUBSCRIPTIONS_SAME_SIDE is same as V_TRUE,
     }) }}"
         data-controller="kbin notifications"
+        data-notifications-endpoint-value="{{ kbin_mercure_enabled() ? 'https://'~kbin_domain()~'/.well-known/mercure' : null }}"
         data-notifications-user-value="{{ app.user ? app.user.id : null }}"
         data-notifications-magazine-value="{{ magazine is defined and magazine ? magazine.id : null }}"
         data-notifications-entry-id-value="{{ entry is defined and entry ? entry.id : null }}"
@@ -78,24 +71,24 @@
 {% include 'layout/_header.html.twig' with {header_nav: block('header_nav')} %}
 {{ component('announcement') }}
 <div id="middle" class="{%- block mainClass -%}page{%- endblock %}">
-    <div class="kbin-container
-      {{ html_classes(app.request.cookies.has(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_PAGE_WIDTH'))
-        ? 'width--'~app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_PAGE_WIDTH'))
-        : '') }}">
+    <div class="kbin-container {{ html_classes('width--'~PAGE_WIDTH) }}">
         <main id="main"
               data-controller="lightbox timeago confirmation"
-              class="{{ html_classes({'view-compact': app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_ENTRIES_COMPACT')) is same as 'true'}) }}">
+              class="{{ html_classes({'view-compact': COMPACT is same as V_TRUE}) }}">
             {% block body %}{% endblock %}
         </main>
-        <aside id="sidebar">
-            {% block sidebar %}
-                {% include 'layout/_sidebar.html.twig' with {sidebar_top: block('sidebar_top'), header_nav: block('header_nav')} %}
-            {% endblock %}
-        </aside>
-        {% if app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SHOW')) is not same as constant('App\\Controller\\User\\ThemeSettingsController::FALSE') and
-            app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_IN_SEPARATE_SIDEBAR')) is same as constant('App\\Controller\\User\\ThemeSettingsController::TRUE') and
-            app.user is defined and app.user is not same as null %}
-            {{ component('sidebar_subscriptions', { openMagazine: magazine is defined ? magazine : null, user: app.user, sort: app.request.cookies.get(constant('App\\Controller\\User\\ThemeSettingsController::KBIN_SUBSCRIPTIONS_SORT'))}) }}
+        {% if not mbin_private_instance() or (mbin_private_instance() and app.user is defined and app.user is not same as null) %}
+            <aside id="sidebar">
+                {% block sidebar %}
+                    {% include 'layout/_sidebar.html.twig' with {sidebar_top: block('sidebar_top'), header_nav: block('header_nav')} %}
+                {% endblock %}
+            </aside>
+        {% endif %}
+        {% if app.user is defined and app.user is not same as null and
+            SUBSCRIPTIONS_SHOW is not same as V_FALSE and
+            SUBSCRIPTIONS_SEPARATE is same as V_TRUE
+        %}
+            {{ component('sidebar_subscriptions', { openMagazine: magazine is defined ? magazine : null, user: app.user, sort: SUBSCRIPTIONS_SORT }) }}
         {% endif %}
     </div>
 </div>
