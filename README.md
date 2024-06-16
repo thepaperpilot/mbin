@@ -127,6 +127,13 @@ For developers:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/thepaperpilot">
+                    <img src="https://avatars.githubusercontent.com/u/3683148?v=4" width="100;" alt="thepaperpilot"/>
+                    <br />
+                    <sub><b>Anthony Lawn</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/weblate">
                     <img src="https://avatars.githubusercontent.com/u/1607653?v=4" width="100;" alt="weblate"/>
                     <br />
@@ -140,6 +147,8 @@ For developers:
                     <sub><b>Kingsley Yung</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/TheVillageGuy">
                     <img src="https://avatars.githubusercontent.com/u/47496248?v=4" width="100;" alt="TheVillageGuy"/>
@@ -147,8 +156,6 @@ For developers:
                     <sub><b>TheVillageGuy</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/danielpervan">
                     <img src="https://avatars.githubusercontent.com/u/5121830?v=4" width="100;" alt="danielpervan"/>
@@ -178,13 +185,6 @@ For developers:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/andrewmoise">
-                    <img src="https://avatars.githubusercontent.com/u/8404538?v=4" width="100;" alt="andrewmoise"/>
-                    <br />
-                    <sub><b>andrewmoise</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/chall8908">
                     <img src="https://avatars.githubusercontent.com/u/315948?v=4" width="100;" alt="chall8908"/>
                     <br />
@@ -194,10 +194,10 @@ For developers:
 		</tr>
 		<tr>
             <td align="center">
-                <a href="https://github.com/thepaperpilot">
-                    <img src="https://avatars.githubusercontent.com/u/3683148?v=4" width="100;" alt="thepaperpilot"/>
+                <a href="https://github.com/andrewmoise">
+                    <img src="https://avatars.githubusercontent.com/u/8404538?v=4" width="100;" alt="andrewmoise"/>
                     <br />
-                    <sub><b>Anthony Lawn</b></sub>
+                    <sub><b>andrewmoise</b></sub>
                 </a>
             </td>
             <td align="center">
