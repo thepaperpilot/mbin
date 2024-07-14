@@ -38,6 +38,9 @@ class PostCommentDto implements ContentVisibilityInterface
     public ?string $visibility = VisibilityInterface::VISIBILITY_VISIBLE;
     public ?string $ip = null;
     public ?string $apId = null;
+    public ?int $apLikeCount = null;
+    public ?int $apDislikeCount = null;
+    public ?int $apShareCount = null;
     public ?array $mentions = null;
     public ?\DateTimeImmutable $createdAt = null;
     public ?\DateTimeImmutable $editedAt = null;
@@ -73,7 +76,7 @@ class PostCommentDto implements ContentVisibilityInterface
             ->addViolation();
     }
 
-    public function createWithParent(Post $post, ?PostComment $parent, ImageDto $image = null, string $body = null): self
+    public function createWithParent(Post $post, ?PostComment $parent, ?ImageDto $image = null, ?string $body = null): self
     {
         $this->post = $post;
         $this->parent = $parent;

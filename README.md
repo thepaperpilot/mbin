@@ -90,12 +90,21 @@ For developers:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/BentiGorlich">
+                    <img src="https://avatars.githubusercontent.com/u/25664458?v=4" width="100;" alt="BentiGorlich"/>
+                    <br />
+                    <sub><b>BentiGorlich</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/SzymonKaminski">
                     <img src="https://avatars.githubusercontent.com/u/8536735?v=4" width="100;" alt="SzymonKaminski"/>
                     <br />
                     <sub><b>SzymonKaminski</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/nobodyatroot">
                     <img src="https://avatars.githubusercontent.com/u/35878315?v=4" width="100;" alt="nobodyatroot"/>
@@ -103,20 +112,11 @@ For developers:
                     <sub><b>debounced</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/cooperaj">
                     <img src="https://avatars.githubusercontent.com/u/400210?v=4" width="100;" alt="cooperaj"/>
                     <br />
                     <sub><b>Adam Cooper</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/BentiGorlich">
-                    <img src="https://avatars.githubusercontent.com/u/25664458?v=4" width="100;" alt="BentiGorlich"/>
-                    <br />
-                    <sub><b>BentiGorlich</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -182,6 +182,13 @@ For developers:
                     <img src="https://avatars.githubusercontent.com/u/7891055?v=4" width="100;" alt="CocoPoops"/>
                     <br />
                     <sub><b>CocoPoops</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/thepaperpilot">
+                    <img src="https://avatars.githubusercontent.com/u/3683148?v=4" width="100;" alt="thepaperpilot"/>
+                    <br />
+                    <sub><b>Anthony Lawn</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -313,7 +320,9 @@ Following languages are currently supported/translated:
 - Dutch
 - English
 - Esperanto
+- Filipino
 - French
+- Galician
 - German
 - Greek
 - Italian

@@ -48,7 +48,7 @@ class Note
      * @throws UserBannedException
      * @throws \Exception
      */
-    public function create(array $object, array $root = null): EntryComment|PostComment|Post
+    public function create(array $object, ?array $root = null, bool $stickyIt = false): EntryComment|PostComment|Post
     {
         $current = $this->repository->findByObjectId($object['id']);
         if ($current) {
@@ -93,7 +93,7 @@ class Note
             }
         }
 
-        return $this->createPost($object);
+        return $this->createPost($object, $stickyIt);
     }
 
     /**
@@ -101,7 +101,7 @@ class Note
      * @throws UserBannedException
      * @throws \Exception
      */
-    private function createEntryComment(array $object, ActivityPubActivityInterface $parent, ActivityPubActivityInterface $root = null): EntryComment
+    private function createEntryComment(array $object, ActivityPubActivityInterface $parent, ?ActivityPubActivityInterface $root = null): EntryComment
     {
         $dto = new EntryCommentDto();
         if ($parent instanceof EntryComment) {
@@ -140,11 +140,11 @@ class Note
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
             }
 
-            return $this->entryCommentManager->create(
-                $dto,
-                $actor,
-                false
-            );
+            $dto->apLikeCount = $this->activityPubManager->extractRemoteLikeCount($object);
+            $dto->apDislikeCount = $this->activityPubManager->extractRemoteDislikeCount($object);
+            $dto->apShareCount = $this->activityPubManager->extractRemoteShareCount($object);
+
+            return $this->entryCommentManager->create($dto, $actor, false);
         } else {
             throw new \Exception('Actor could not be found for entry comment.');
         }
@@ -184,10 +184,10 @@ class Note
         }
     }
 
-    private function createPost(array $object): Post
+    private function createPost(array $object, bool $stickyIt = false): Post
     {
         $dto = new PostDto();
-        $dto->magazine = $this->activityPubManager->findOrCreateMagazineByToAndCC($object);
+        $dto->magazine = $this->activityPubManager->findOrCreateMagazineByToCCAndAudience($object);
         $dto->apId = $object['id'];
 
         $actor = $this->activityPubManager->findActorOrCreate($object['attributedTo']);
@@ -219,18 +219,17 @@ class Note
             } else {
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
             }
+            $dto->apLikeCount = $this->activityPubManager->extractRemoteLikeCount($object);
+            $dto->apDislikeCount = $this->activityPubManager->extractRemoteDislikeCount($object);
+            $dto->apShareCount = $this->activityPubManager->extractRemoteShareCount($object);
 
-            return $this->postManager->create(
-                $dto,
-                $actor,
-                false
-            );
+            return $this->postManager->create($dto, $actor, false, $stickyIt);
         } else {
             throw new \Exception('Actor could not be found for post.');
         }
     }
 
-    private function createPostComment(array $object, ActivityPubActivityInterface $parent, ActivityPubActivityInterface $root = null): PostComment
+    private function createPostComment(array $object, ActivityPubActivityInterface $parent, ?ActivityPubActivityInterface $root = null): PostComment
     {
         $dto = new PostCommentDto();
         if ($parent instanceof PostComment) {
@@ -267,12 +266,11 @@ class Note
             } else {
                 $dto->lang = $this->settingsManager->get('KBIN_DEFAULT_LANG');
             }
+            $dto->apLikeCount = $this->activityPubManager->extractRemoteLikeCount($object);
+            $dto->apDislikeCount = $this->activityPubManager->extractRemoteDislikeCount($object);
+            $dto->apShareCount = $this->activityPubManager->extractRemoteShareCount($object);
 
-            return $this->postCommentManager->create(
-                $dto,
-                $actor,
-                false
-            );
+            return $this->postCommentManager->create($dto, $actor, false);
         } else {
             throw new \Exception('Actor could not be found for post comment.');
         }

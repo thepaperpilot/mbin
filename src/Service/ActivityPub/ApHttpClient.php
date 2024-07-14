@@ -110,7 +110,7 @@ class ApHttpClient
      *
      * @return array|null the webfinger object
      *
-     * @throws InvalidWebfingerException|\Psr\Cache\InvalidArgumentException
+     * @throws InvalidWebfingerException|InvalidArgumentException
      */
     public function getWebfingerObject(string $url): ?array
     {
@@ -148,7 +148,7 @@ class ApHttpClient
      *
      * @return array|null key/value array of actor response body
      *
-     * @throws InvalidApPostException|\Psr\Cache\InvalidArgumentException
+     * @throws InvalidApPostException|InvalidArgumentException
      */
     public function getActorObject(string $apProfileId): ?array
     {
@@ -198,7 +198,7 @@ class ApHttpClient
 
                 if (404 === $response->getStatusCode()) {
                     // treat a 404 error the same as a tombstone, since we think there was an actor, but it isn't there anymore
-                    return $this->tombstoneFactory->create($apProfileId);
+                    return json_encode($this->tombstoneFactory->create($apProfileId));
                 }
 
                 // Return the content.
@@ -210,10 +210,15 @@ class ApHttpClient
         return $resp ? json_decode($resp, true) : null;
     }
 
+    public function invalidateCollectionObjectCache(string $apAddress): void
+    {
+        $this->cache->delete('ap_collection'.hash('sha256', $apAddress));
+    }
+
     /**
      * @throws InvalidArgumentException
      */
-    public function getCollectionObject(string $apAddress)
+    public function getCollectionObject(string $apAddress): ?array
     {
         $resp = $this->cache->get(
             'ap_collection'.hash('sha256', $apAddress),
@@ -261,7 +266,7 @@ class ApHttpClient
      *
      * @throws InvalidApPostException if the POST request fails with a non-2xx response status code
      */
-    public function post(string $url, User|Magazine $actor, array $body = null): void
+    public function post(string $url, User|Magazine $actor, ?array $body = null): void
     {
         $cacheKey = 'ap_'.hash('sha256', $url.':'.$body['id']);
 
@@ -299,7 +304,7 @@ class ApHttpClient
         }, array_keys($headers), $headers);
     }
 
-    private function getHeaders(string $url, User|Magazine $actor, array $body = null): array
+    private function getHeaders(string $url, User|Magazine $actor, ?array $body = null): array
     {
         $headers = self::headersToSign($url, $body ? self::digest($body) : null);
         $stringToSign = self::headersToSigningString($headers);
@@ -322,7 +327,7 @@ class ApHttpClient
         return $headers;
     }
 
-    private function getInstanceHeaders(string $url, array $body = null, string $method = 'get', ApRequestType $requestType = ApRequestType::ActivityPub): array
+    private function getInstanceHeaders(string $url, ?array $body = null, string $method = 'get', ApRequestType $requestType = ApRequestType::ActivityPub): array
     {
         $keyId = 'https://'.$this->kbinDomain.'/i/actor#main-key';
         $privateKey = $this->getInstancePrivateKey();
@@ -354,7 +359,7 @@ class ApHttpClient
         'Accept' => 'string',
         'Digest' => 'string',
     ])]
-    protected static function headersToSign(string $url, string $digest = null, string $method = 'post'): array
+    protected static function headersToSign(string $url, ?string $digest = null, string $method = 'post'): array
     {
         $date = new \DateTime('UTC');
 

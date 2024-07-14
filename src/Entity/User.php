@@ -42,6 +42,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[UniqueConstraint(name: 'user_username_idx', columns: ['username'])]
 #[UniqueConstraint(name: 'user_ap_id_idx', columns: ['ap_id'])]
 #[UniqueConstraint(name: 'user_ap_profile_id_idx', columns: ['ap_profile_id'])]
+#[UniqueConstraint(name: 'user_ap_public_url_idx', columns: ['ap_public_url'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, VisibilityInterface, TwoFactorInterface, BackupCodeInterface, EquatableInterface, ActivityPubActorInterface, ApiResourceInterface
 {
     use ActivityPubActorTrait;
@@ -122,6 +123,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
     public ?string $oauthKeycloakId = null;
     #[Column(type: 'string', nullable: true)]
     public ?string $oauthSimpleLoginId = null;
+    #[Column(type: 'string', nullable: true)]
+    public ?string $oauthDiscordId = null;
     #[Column(type: 'string', nullable: true)]
     public ?string $oauthZitadelId = null;
     #[Column(type: 'string', nullable: true)]
@@ -238,8 +241,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
         string $username,
         string $password,
         string $type,
-        string $apProfileId = null,
-        string $apId = null
+        ?string $apProfileId = null,
+        ?string $apId = null
     ) {
         $this->email = $email;
         $this->password = $password;
@@ -761,7 +764,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
 
     public function isSsoControlled(): bool
     {
-        return $this->oauthAzureId || $this->oauthGithubId || $this->oauthGoogleId || $this->oauthFacebookId || $this->oauthKeycloakId || $this->oauthSimpleLoginId || $this->oauthZitadelId || $this->oauthAuthentikId || $this->oauthPrivacyPortalId;
+        return $this->oauthAzureId || $this->oauthGithubId || $this->oauthGoogleId || $this->oauthDiscordId || $this->oauthFacebookId || $this->oauthKeycloakId || $this->oauthSimpleLoginId || $this->oauthZitadelId || $this->oauthAuthentikId || $this->oauthPrivacyPortalId;
     }
 
     public function getCustomCss(): ?string

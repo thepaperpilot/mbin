@@ -6,8 +6,6 @@ namespace App\MessageHandler\ActivityPub\Inbox;
 
 use App\Entity\Entry;
 use App\Entity\EntryComment;
-use App\Entity\Post;
-use App\Entity\PostComment;
 use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
 use App\Message\ActivityPub\Inbox\ChainActivityMessage;
@@ -16,6 +14,8 @@ use App\Message\ActivityPub\Outbox\AnnounceMessage;
 use App\Repository\ApActivityRepository;
 use App\Service\ActivityPub\Note;
 use App\Service\ActivityPub\Page;
+use App\Service\ActivityPubManager;
+use App\Service\MessageManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -24,12 +24,15 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class CreateHandler
 {
     private array $object;
+    private bool $stickyIt;
 
     public function __construct(
         private readonly Note $note,
         private readonly Page $page,
         private readonly MessageBusInterface $bus,
         private readonly LoggerInterface $logger,
+        private readonly MessageManager $messageManager,
+        private readonly ActivityPubManager $activityPubManager,
         private readonly ApActivityRepository $repository
     ) {
     }
@@ -40,23 +43,18 @@ class CreateHandler
     public function __invoke(CreateMessage $message): void
     {
         $this->object = $message->payload;
-        $this->logger->debug('Got a CreateMessage of type {t}', [$message->payload['type'], $message->payload]);
+        $this->stickyIt = $message->stickyIt;
+        $this->logger->debug('Got a CreateMessage of type {t}, {m}', ['t' => $message->payload['type'], 'm' => $message->payload]);
+        $entryTypes = ['Page', 'Article', 'Video'];
+        $postTypes = ['Question', 'Note'];
 
         try {
-            if ('Note' === $this->object['type']) {
+            if ('ChatMessage' === $this->object['type']) {
+                $this->handlePrivateMessage();
+            } elseif (\in_array($this->object['type'], $postTypes)) {
                 $this->handleChain();
-            }
-
-            if ('Page' === $this->object['type']) {
+            } elseif (\in_array($this->object['type'], $entryTypes)) {
                 $this->handlePage();
-            }
-
-            if ('Article' === $this->object['type']) {
-                $this->handlePage();
-            }
-
-            if ('Question' === $this->object['type']) {
-                $this->handleChain();
             }
         } catch (UserBannedException) {
             $this->logger->info('Did not create the post, because the user is banned');
@@ -76,7 +74,7 @@ class CreateHandler
             }
         }
 
-        $note = $this->note->create($this->object);
+        $note = $this->note->create($this->object, stickyIt: $this->stickyIt);
         // TODO atm post and post comment are not announced, because of the micro blog spam towards lemmy. If we implement magazine name as hashtag to be optional than this may be reverted
         if ($note instanceof EntryComment /* or $note instanceof Post or $note instanceof PostComment */) {
             if (null !== $note->apId and null === $note->magazine->apId and 'random' !== $note->magazine->name) {
@@ -93,12 +91,22 @@ class CreateHandler
      */
     private function handlePage(): void
     {
-        $page = $this->page->create($this->object);
+        $page = $this->page->create($this->object, stickyIt: $this->stickyIt);
         if ($page instanceof Entry) {
             if (null !== $page->apId and null === $page->magazine->apId and 'random' !== $page->magazine->name) {
                 // local magazine, but remote post. Random magazine is ignored, as it should not be federated at all
                 $this->bus->dispatch(new AnnounceMessage(null, $page->magazine->getId(), $page->getId(), \get_class($page)));
             }
         }
+    }
+
+    private function handlePrivateMessage(): void
+    {
+        $this->messageManager->createMessage($this->object);
+    }
+
+    private function handlePrivateMentions(): void
+    {
+        // TODO implement private mentions
     }
 }

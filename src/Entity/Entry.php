@@ -149,7 +149,7 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
         bool $isAdult,
         ?bool $isOc,
         ?string $lang,
-        string $ip = null
+        ?string $ip = null
     ) {
         $this->title = $title;
         $this->url = $url;
@@ -283,7 +283,7 @@ class Entry implements VotableInterface, CommentInterface, DomainInterface, Visi
 
     public function updateScore(): self
     {
-        $this->score = $this->getUpVotes()->count() + $this->favouriteCount - $this->getDownVotes()->count();
+        $this->score = ($this->apShareCount ?? $this->getUpVotes()->count()) + ($this->apLikeCount ?? $this->favouriteCount) - ($this->apDislikeCount ?? $this->getDownVotes()->count());
 
         return $this;
     }

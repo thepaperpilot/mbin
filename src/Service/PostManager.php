@@ -21,6 +21,7 @@ use App\Factory\PostFactory;
 use App\Message\DeleteImageMessage;
 use App\Repository\ImageRepository;
 use App\Repository\PostRepository;
+use App\Service\ActivityPub\ApHttpClient;
 use App\Service\Contracts\ContentManagerInterface;
 use App\Utils\Slugger;
 use Doctrine\Common\Collections\Criteria;
@@ -51,6 +52,7 @@ class PostManager implements ContentManagerInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly PostRepository $postRepository,
         private readonly ImageRepository $imageRepository,
+        private readonly ApHttpClient $apHttpClient,
         private readonly CacheInterface $cache
     ) {
     }
@@ -61,7 +63,7 @@ class PostManager implements ContentManagerInterface
      * @throws TooManyRequestsHttpException
      * @throws \Exception
      */
-    public function create(PostDto $dto, User $user, $rateLimit = true): Post
+    public function create(PostDto $dto, User $user, $rateLimit = true, bool $stickyIt = false): Post
     {
         if ($dto->magazine->isBanned($user) || $user->isBanned()) {
             throw new UserBannedException();
@@ -84,6 +86,9 @@ class PostManager implements ContentManagerInterface
         $post->mentions = $dto->body ? $this->mentionManager->extract($dto->body) : null;
         $post->visibility = $dto->visibility;
         $post->apId = $dto->apId;
+        $post->apLikeCount = $dto->apLikeCount;
+        $post->apDislikeCount = $dto->apDislikeCount;
+        $post->apShareCount = $dto->apShareCount;
         $post->magazine->lastActive = new \DateTime();
         $post->user->lastActive = new \DateTime();
         $post->lastActive = $dto->lastActive ?? $post->lastActive;
@@ -92,12 +97,19 @@ class PostManager implements ContentManagerInterface
             throw new \Exception('Post body and image cannot be empty');
         }
 
+        $post->updateScore();
+        $post->updateRanking();
+
         $this->entityManager->persist($post);
         $this->entityManager->flush();
 
         $this->tagManager->updatePostTags($post, $this->tagExtractor->extract($post->body) ?? []);
 
         $this->dispatcher->dispatch(new PostCreatedEvent($post));
+
+        if ($stickyIt) {
+            $this->pin($post);
+        }
 
         return $post;
     }
@@ -121,6 +133,12 @@ class PostManager implements ContentManagerInterface
         if (empty($post->body) && null === $post->image) {
             throw new \Exception('Post body and image cannot be empty');
         }
+
+        $post->apLikeCount = $dto->apLikeCount;
+        $post->apDislikeCount = $dto->apDislikeCount;
+        $post->apShareCount = $dto->apShareCount;
+        $post->updateScore();
+        $post->updateRanking();
 
         $this->entityManager->flush();
 
@@ -205,11 +223,18 @@ class PostManager implements ContentManagerInterface
         $this->dispatcher->dispatch(new PostRestoredEvent($post, $user));
     }
 
+    /**
+     * this toggles the pin state of the post. If it was not pinned it pins, if it was pinned it unpins it.
+     */
     public function pin(Post $post): Post
     {
         $post->sticky = !$post->sticky;
 
         $this->entityManager->flush();
+
+        if (null !== $post->magazine->apFeaturedUrl) {
+            $this->apHttpClient->invalidateCollectionObjectCache($post->magazine->apFeaturedUrl);
+        }
 
         return $post;
     }
