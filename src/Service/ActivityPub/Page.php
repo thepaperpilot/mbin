@@ -12,15 +12,17 @@ use App\Entity\Contracts\ActivityPubActivityInterface;
 use App\Entity\Contracts\VisibilityInterface;
 use App\Entity\Entry;
 use App\Entity\User;
+use App\Exception\EntityNotFoundException;
+use App\Exception\PostingRestrictedException;
 use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
+use App\Exception\UserDeletedException;
 use App\Factory\ImageFactory;
 use App\Repository\ApActivityRepository;
 use App\Service\ActivityPubManager;
 use App\Service\EntryManager;
 use App\Service\SettingsManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Psr\Log\LoggerInterface;
 
 class Page
@@ -40,7 +42,10 @@ class Page
     /**
      * @throws TagBannedException
      * @throws UserBannedException
-     * @throws \Exception          if the user could not be found or a sub exception occurred
+     * @throws UserDeletedException
+     * @throws EntityNotFoundException    if the user could not be found or a sub exception occurred
+     * @throws PostingRestrictedException if the target magazine has Magazine::postingRestrictedToMods = true and the actor is a magazine or a user that is not a mod
+     * @throws \Exception                 if there was an error
      */
     public function create(array $object, bool $stickyIt = false): Entry
     {
@@ -49,6 +54,9 @@ class Page
         if (!empty($actor)) {
             if ($actor->isBanned) {
                 throw new UserBannedException();
+            }
+            if ($actor->isDeleted || $actor->isTrashed() || $actor->isSoftDeleted()) {
+                throw new UserDeletedException();
             }
 
             $current = $this->repository->findByObjectId($object['id']);
@@ -67,6 +75,10 @@ class Page
             }
 
             $magazine = $this->activityPubManager->findOrCreateMagazineByToCCAndAudience($object);
+            if ($magazine->isActorPostingRestricted($actor)) {
+                throw new PostingRestrictedException($magazine, $actor);
+            }
+
             $dto = new EntryDto();
             $dto->magazine = $magazine;
             $dto->title = $object['name'];
@@ -104,12 +116,12 @@ class Page
 
             return $this->entryManager->create($dto, $actor, false, $stickyIt);
         } else {
-            throw new \Exception('Actor could not be found for entry.');
+            throw new EntityNotFoundException('Actor could not be found for entry.');
         }
     }
 
     /**
-     * @throws \Exception
+     * @throws \LogicException
      */
     private function getVisibility(array $object, User $actor): string
     {
@@ -123,7 +135,7 @@ class Page
                     array_merge($object['to'] ?? [], $object['cc'] ?? [])
                 )
             ) {
-                throw new \Exception('PM: not implemented.');
+                throw new \LogicException('PM: not implemented.');
             }
 
             return VisibilityInterface::VISIBILITY_PRIVATE;

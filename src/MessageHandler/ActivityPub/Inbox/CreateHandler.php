@@ -6,27 +6,34 @@ namespace App\MessageHandler\ActivityPub\Inbox;
 
 use App\Entity\Entry;
 use App\Entity\EntryComment;
+use App\Entity\User;
+use App\Exception\PostingRestrictedException;
 use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
+use App\Exception\UserDeletedException;
 use App\Message\ActivityPub\Inbox\ChainActivityMessage;
 use App\Message\ActivityPub\Inbox\CreateMessage;
 use App\Message\ActivityPub\Outbox\AnnounceMessage;
+use App\Message\Contracts\MessageInterface;
+use App\MessageHandler\MbinMessageHandler;
 use App\Repository\ApActivityRepository;
 use App\Service\ActivityPub\Note;
 use App\Service\ActivityPub\Page;
 use App\Service\ActivityPubManager;
 use App\Service\MessageManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
-class CreateHandler
+class CreateHandler extends MbinMessageHandler
 {
     private array $object;
     private bool $stickyIt;
 
     public function __construct(
+        private readonly EntityManagerInterface $entityManager,
         private readonly Note $note,
         private readonly Page $page,
         private readonly MessageBusInterface $bus,
@@ -35,6 +42,7 @@ class CreateHandler
         private readonly ActivityPubManager $activityPubManager,
         private readonly ApActivityRepository $repository
     ) {
+        parent::__construct($this->entityManager);
     }
 
     /**
@@ -42,6 +50,14 @@ class CreateHandler
      */
     public function __invoke(CreateMessage $message): void
     {
+        $this->workWrapper($message);
+    }
+
+    public function doWork(MessageInterface $message): void
+    {
+        if (!($message instanceof CreateMessage)) {
+            throw new \LogicException();
+        }
         $this->object = $message->payload;
         $this->stickyIt = $message->stickyIt;
         $this->logger->debug('Got a CreateMessage of type {t}, {m}', ['t' => $message->payload['type'], 'm' => $message->payload]);
@@ -58,11 +74,25 @@ class CreateHandler
             }
         } catch (UserBannedException) {
             $this->logger->info('Did not create the post, because the user is banned');
+        } catch (UserDeletedException) {
+            $this->logger->info('Did not create the post, because the user is deleted');
         } catch (TagBannedException) {
             $this->logger->info('Did not create the post, because one of the used tags is banned');
+        } catch (PostingRestrictedException $e) {
+            if ($e->actor instanceof User) {
+                $username = $e->actor->getUsername();
+            } else {
+                $username = $e->actor->name;
+            }
+            $this->logger->info('Did not create the post, because the magazine {m} restricts posting to mods and {u} is not a mod', ['m' => $e->magazine, 'u' => $username]);
         }
     }
 
+    /**
+     * @throws TagBannedException
+     * @throws UserBannedException
+     * @throws UserDeletedException
+     */
     private function handleChain(): void
     {
         if (isset($this->object['inReplyTo']) && $this->object['inReplyTo']) {
@@ -87,7 +117,9 @@ class CreateHandler
     /**
      * @throws \Exception
      * @throws UserBannedException
+     * @throws UserDeletedException
      * @throws TagBannedException
+     * @throws PostingRestrictedException
      */
     private function handlePage(): void
     {

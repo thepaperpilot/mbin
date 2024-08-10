@@ -239,7 +239,69 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $pagerfanta;
     }
 
-    public function findAllPaginated(int $page, bool $onlyLocal = false): PagerfantaInterface
+    public function findAllActivePaginated(int $page, bool $onlyLocal = false): PagerfantaInterface
+    {
+        $builder = $this->createQueryBuilder('u');
+        if ($onlyLocal) {
+            $builder->where('u.apId IS NULL')
+            ->andWhere('u.isVerified = true');
+        } else {
+            $builder->where('u.apId IS NOT NULL');
+        }
+        $query = $builder
+            ->andWhere('u.visibility = :visibility')
+            ->andWhere('u.isDeleted = false')
+            ->andWhere('u.isBanned = false')
+            ->setParameter('visibility', VisibilityInterface::VISIBILITY_VISIBLE)
+            ->orderBy('u.createdAt', 'ASC')
+            ->getQuery();
+
+        $pagerfanta = new Pagerfanta(
+            new QueryAdapter(
+                $query
+            )
+        );
+
+        try {
+            $pagerfanta->setMaxPerPage(self::PER_PAGE);
+            $pagerfanta->setCurrentPage($page);
+        } catch (NotValidCurrentPageException $e) {
+            throw new NotFoundHttpException();
+        }
+
+        return $pagerfanta;
+    }
+
+    public function findAllInactivePaginated(int $page): PagerfantaInterface
+    {
+        $builder = $this->createQueryBuilder('u');
+
+        $query = $builder->where('u.apId IS NULL')
+            ->andWhere('u.visibility = :visibility')
+            ->andWhere('u.isVerified = false')
+            ->andWhere('u.isDeleted = false')
+            ->andWhere('u.isBanned = false')
+            ->setParameter('visibility', VisibilityInterface::VISIBILITY_VISIBLE)
+            ->orderBy('u.createdAt', 'ASC')
+            ->getQuery();
+
+        $pagerfanta = new Pagerfanta(
+            new QueryAdapter(
+                $query
+            )
+        );
+
+        try {
+            $pagerfanta->setMaxPerPage(self::PER_PAGE);
+            $pagerfanta->setCurrentPage($page);
+        } catch (NotValidCurrentPageException $e) {
+            throw new NotFoundHttpException();
+        }
+
+        return $pagerfanta;
+    }
+
+    public function findAllBannedPaginated(int $page, bool $onlyLocal = false): PagerfantaInterface
     {
         $builder = $this->createQueryBuilder('u');
         if ($onlyLocal) {
@@ -248,6 +310,39 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
             $builder->where('u.apId IS NOT NULL');
         }
         $query = $builder
+            ->andWhere('u.isBanned = true')
+            ->andWhere('u.isDeleted = false')
+            ->orderBy('u.createdAt', 'ASC')
+            ->getQuery();
+
+        $pagerfanta = new Pagerfanta(
+            new QueryAdapter(
+                $query
+            )
+        );
+
+        try {
+            $pagerfanta->setMaxPerPage(self::PER_PAGE);
+            $pagerfanta->setCurrentPage($page);
+        } catch (NotValidCurrentPageException $e) {
+            throw new NotFoundHttpException();
+        }
+
+        return $pagerfanta;
+    }
+
+    public function findAllSuspendedPaginated(int $page, bool $onlyLocal = false): PagerfantaInterface
+    {
+        $builder = $this->createQueryBuilder('u');
+        if ($onlyLocal) {
+            $builder->where('u.apId IS NULL');
+        } else {
+            $builder->where('u.apId IS NOT NULL');
+        }
+        $query = $builder
+            ->andWhere('u.visibility = :visibility')
+            ->andWhere('u.isDeleted = false')
+            ->setParameter('visibility', VisibilityInterface::VISIBILITY_TRASHED)
             ->orderBy('u.createdAt', 'ASC')
             ->getQuery();
 
@@ -295,7 +390,7 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
+            throw new UnsupportedUserException(\sprintf('Instances of "%s" are not supported.', $user::class));
         }
 
         $user->setPassword($newHashedPassword);
@@ -485,6 +580,18 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $result[0];
     }
 
+    /**
+     * @return User[]
+     */
+    public function findAllAdmins(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere("JSONB_CONTAINS(u.roles, '\"".'ROLE_ADMIN'."\"') = true")
+            ->andWhere('u.isDeleted = false')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findUsersSuggestions(string $query): array
     {
         $qb = $this->createQueryBuilder('u');
@@ -634,5 +741,19 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         }
 
         return $pagerfanta;
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findAllModerators(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where("JSONB_CONTAINS(u.roles, '\"".'ROLE_MODERATOR'."\"') = true")
+            ->andWhere('u.visibility = :visibility')
+            ->setParameter('visibility', VisibilityInterface::VISIBILITY_VISIBLE)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 }

@@ -221,6 +221,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
     #[OneToMany(mappedBy: 'user', targetEntity: Notification::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
     #[OrderBy(['createdAt' => 'DESC'])]
     public Collection $notifications;
+    #[OneToMany(mappedBy: 'user', targetEntity: UserPushSubscription::class, cascade: ['persist', 'remove'], fetch: 'EXTRA_LAZY', orphanRemoval: true)]
+    public Collection $pushSubscriptions;
     #[Id]
     #[GeneratedValue]
     #[Column(type: 'integer')]
@@ -826,9 +828,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
         $this->visibility = self::VISIBILITY_SOFT_DELETED;
     }
 
+    public function isSoftDeleted(): bool
+    {
+        return self::VISIBILITY_SOFT_DELETED === $this->visibility;
+    }
+
     public function trash(): void
     {
         $this->visibility = self::VISIBILITY_TRASHED;
+    }
+
+    public function isTrashed(): bool
+    {
+        return self::VISIBILITY_TRASHED === $this->visibility;
     }
 
     public function restore(): void
@@ -867,6 +879,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
                 ['username' => $this->username],
                 UrlGeneratorInterface::ABSOLUTE_URL
             );
+        }
+    }
+
+    public function canUpdateUser(User $actor): bool
+    {
+        if (null === $this->apId) {
+            return null === $actor->apId && $actor->isAdmin();
+        } else {
+            return $this->apDomain === $actor->apDomain;
         }
     }
 }

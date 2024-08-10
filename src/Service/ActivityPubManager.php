@@ -12,6 +12,7 @@ use App\Entity\Contracts\ActivityPubActorInterface;
 use App\Entity\Entry;
 use App\Entity\EntryComment;
 use App\Entity\Image;
+use App\Entity\Instance;
 use App\Entity\Magazine;
 use App\Entity\Moderator;
 use App\Entity\Post;
@@ -28,6 +29,7 @@ use App\Message\DeleteUserMessage;
 use App\Repository\ApActivityRepository;
 use App\Repository\EntryRepository;
 use App\Repository\ImageRepository;
+use App\Repository\InstanceRepository;
 use App\Repository\MagazineRepository;
 use App\Repository\UserRepository;
 use App\Service\ActivityPub\ApHttpClient;
@@ -67,6 +69,8 @@ class ActivityPubManager
         private readonly RateLimiterFactory $apUpdateActorLimiter,
         private readonly EntryRepository $entryRepository,
         private readonly EntryManager $entryManager,
+        private readonly RemoteInstanceManager $remoteInstanceManager,
+        private readonly InstanceRepository $instanceRepository,
     ) {
     }
 
@@ -139,7 +143,7 @@ class ActivityPubManager
             if (!substr_count(ltrim($actorUrl, '@'), '@')) {
                 $user = $this->userRepository->findOneBy(['username' => ltrim($actorUrl, '@')]);
                 if ($user instanceof User) {
-                    if ($user->apId && (!$user->apFetchedAt || $user->apFetchedAt->modify('+1 hour') < (new \DateTime()))) {
+                    if ($user->apId && !$user->isDeleted && !$user->isSoftDeleted() && !$user->isTrashed() && (!$user->apFetchedAt || $user->apFetchedAt->modify('+1 hour') < (new \DateTime()))) {
                         $this->dispatchUpdateActor($user->apProfileId);
                     }
 
@@ -165,7 +169,7 @@ class ActivityPubManager
         $user = $this->userRepository->findOneBy(['apProfileId' => $actorUrl]);
         if ($user instanceof User) {
             $this->logger->debug('found remote user for url "{url}" in db', ['url' => $actorUrl]);
-            if ($user->apId && (!$user->apFetchedAt || $user->apFetchedAt->modify('+1 hour') < (new \DateTime()))) {
+            if ($user->apId && !$user->isDeleted && !$user->isSoftDeleted() && !$user->isTrashed() && (!$user->apFetchedAt || $user->apFetchedAt->modify('+1 hour') < (new \DateTime()))) {
                 $this->dispatchUpdateActor($user->apProfileId);
             }
 
@@ -174,7 +178,7 @@ class ActivityPubManager
         $magazine = $this->magazineRepository->findOneBy(['apProfileId' => $actorUrl]);
         if ($magazine instanceof Magazine) {
             $this->logger->debug('found remote user for url "{url}" in db', ['url' => $actorUrl]);
-            if (!$magazine->apFetchedAt || $magazine->apFetchedAt->modify('+1 hour') < (new \DateTime())) {
+            if (!$magazine->isTrashed() && !$magazine->isSoftDeleted() && (!$magazine->apFetchedAt || $magazine->apFetchedAt->modify('+1 hour') < (new \DateTime()))) {
                 $this->dispatchUpdateActor($magazine->apProfileId);
             }
 
@@ -271,7 +275,7 @@ class ActivityPubManager
             ? ':'.parse_url($id, PHP_URL_PORT)
             : '';
 
-        return sprintf(
+        return \sprintf(
             '%s@%s%s',
             $this->apHttpClient->getActorObject($id)['preferredUsername'],
             parse_url($id, PHP_URL_HOST),
@@ -309,6 +313,10 @@ class ActivityPubManager
     {
         $this->logger->info('updating user {name}', ['name' => $actorUrl]);
         $user = $this->userRepository->findOneBy(['apProfileId' => $actorUrl]);
+
+        if ($user->isDeleted || $user->isTrashed() || $user->isSoftDeleted()) {
+            return $user;
+        }
 
         $actor = $this->apHttpClient->getActorObject($actorUrl);
         if (!$actor || !\is_array($actor)) {
@@ -356,7 +364,10 @@ class ActivityPubManager
 
             // Only update avatar if icon is set
             if (isset($actor['icon'])) {
-                $newImage = $this->handleImages([$actor['icon']]);
+                // we only have to wrap the property in an array if it is not already an array, though that is not that easy to determine
+                // because each json object is an associative array -> each image has to have a 'type' property so use that to check it
+                $icon = !\array_key_exists('type', $actor['icon']) ? $actor['icon'] : [$actor['icon']];
+                $newImage = $this->handleImages($icon);
                 if ($user->avatar && $newImage !== $user->avatar) {
                     $this->bus->dispatch(new DeleteImageMessage($user->avatar->getId()));
                 }
@@ -365,7 +376,10 @@ class ActivityPubManager
 
             // Only update cover if image is set
             if (isset($actor['image'])) {
-                $newImage = $this->handleImages([$actor['image']]);
+                // we only have to wrap the property in an array if it is not already an array, though that is not that easy to determine
+                // because each json object is an associative array -> each image has to have a 'type' property so use that to check it
+                $cover = !\array_key_exists('type', $actor['image']) ? $actor['image'] : [$actor['image']];
+                $newImage = $this->handleImages($cover);
                 if ($user->cover && $newImage !== $user->cover) {
                     $this->bus->dispatch(new DeleteImageMessage($user->cover->getId()));
                 }
@@ -379,8 +393,16 @@ class ActivityPubManager
                         $user->apFollowersCount = $followersObj['totalItems'];
                         $user->updateFollowCounts();
                     }
-                } catch (InvalidApPostException $ignored) {
+                } catch (InvalidApPostException|InvalidArgumentException $ignored) {
                 }
+            }
+
+            if (null !== $user->apId) {
+                $instance = $this->instanceRepository->findOneBy(['domain' => $user->apDomain]);
+                if (null === $instance) {
+                    $instance = new Instance($user->apDomain);
+                }
+                $this->remoteInstanceManager->updateInstance($instance);
             }
 
             // Write to DB
@@ -403,11 +425,20 @@ class ActivityPubManager
 
         if (\count($images)) {
             try {
-                if ($tempFile = $this->imageManager->download($images[0]['url'])) {
+                $imageObject = $images[0];
+                if (isset($imageObject['height'])) {
+                    // determine the highest resolution image
+                    foreach ($images as $i) {
+                        if (isset($i['height']) && $i['height'] ?? 0 > $imageObject['height'] ?? 0) {
+                            $imageObject = $i;
+                        }
+                    }
+                }
+                if ($tempFile = $this->imageManager->download($imageObject['url'])) {
                     $image = $this->imageRepository->findOrCreateFromPath($tempFile);
-                    $image->sourceUrl = $images[0]['url'];
-                    if ($image && isset($images[0]['name'])) {
-                        $image->altText = $images[0]['name'];
+                    $image->sourceUrl = $imageObject['url'];
+                    if ($image && isset($imageObject['name'])) {
+                        $image->altText = $imageObject['name'];
                     }
                     $this->entityManager->persist($image);
                     $this->entityManager->flush();
@@ -452,6 +483,10 @@ class ActivityPubManager
         $this->logger->info('updating magazine "{magName}"', ['magName' => $actorUrl]);
         $magazine = $this->magazineRepository->findOneBy(['apProfileId' => $actorUrl]);
 
+        if ($magazine->isTrashed() || $magazine->isSoftDeleted()) {
+            return $magazine;
+        }
+
         $actor = $this->apHttpClient->getActorObject($actorUrl);
         // Check if actor isn't empty (not set/null/empty array/etc.)
 
@@ -468,7 +503,10 @@ class ActivityPubManager
             }
 
             if (isset($actor['icon'])) {
-                $newImage = $this->handleImages([$actor['icon']]);
+                // we only have to wrap the property in an array if it is not already an array, though that is not that easy to determine
+                // because each json object is an associative array -> each image has to have a 'type' property so use that to check it
+                $icon = !\array_key_exists('type', $actor['icon']) ? $actor['icon'] : [$actor['icon']];
+                $newImage = $this->handleImages($icon);
                 if ($magazine->icon && $newImage !== $magazine->icon) {
                     $this->bus->dispatch(new DeleteImageMessage($magazine->icon->getId()));
                 }
@@ -504,6 +542,7 @@ class ActivityPubManager
             $magazine->apTimeoutAt = null;
             $magazine->apFetchedAt = new \DateTime();
             $magazine->isAdult = $actor['sensitive'] ?? false;
+            $magazine->postingRestrictedToMods = filter_var($actor['postingRestrictedToMods'] ?? false, FILTER_VALIDATE_BOOLEAN) ?? false;
 
             if (null !== $magazine->apFollowersUrl) {
                 try {
@@ -513,18 +552,31 @@ class ActivityPubManager
                         $magazine->apFollowersCount = $followersObj['totalItems'];
                         $magazine->updateSubscriptionsCount();
                     }
-                } catch (InvalidApPostException $ignored) {
+                } catch (InvalidApPostException|InvalidArgumentException $ignored) {
                 }
             }
 
             if (null !== $magazine->apAttributedToUrl) {
-                $this->handleModeratorCollection($actorUrl, $magazine);
+                try {
+                    $this->handleModeratorCollection($actorUrl, $magazine);
+                } catch (InvalidArgumentException $ignored) {
+                }
             }
 
             if (null !== $magazine->apFeaturedUrl) {
-                $this->handleMagazineFeaturedCollection($actorUrl, $magazine);
+                try {
+                    $this->handleMagazineFeaturedCollection($actorUrl, $magazine);
+                } catch (InvalidArgumentException $ignored) {
+                }
             }
 
+            if (null !== $magazine->apId) {
+                $instance = $this->instanceRepository->findOneBy(['domain' => $magazine->apDomain]);
+                if (null === $instance) {
+                    $instance = new Instance($magazine->apDomain);
+                }
+                $this->remoteInstanceManager->updateInstance($instance);
+            }
             $this->entityManager->flush();
 
             return $magazine;
@@ -794,7 +846,7 @@ class ActivityPubManager
     {
         $potentialGroups = self::getReceivers($object);
         $magazine = $this->magazineRepository->findByApGroupProfileId($potentialGroups);
-        if ($magazine and $magazine->apId && (!$magazine->apFetchedAt || $magazine->apFetchedAt->modify('+1 Day') < (new \DateTime()))) {
+        if ($magazine and $magazine->apId && !$magazine->isTrashed() && !$magazine->isSoftDeleted() && (!$magazine->apFetchedAt || $magazine->apFetchedAt->modify('+1 Day') < (new \DateTime()))) {
             $this->dispatchUpdateActor($magazine->apPublicUrl);
         }
 
@@ -1030,6 +1082,7 @@ class ActivityPubManager
     {
         if (!empty($apObject['likes'])) {
             if (false !== filter_var($apObject['likes'], FILTER_VALIDATE_URL)) {
+                $this->apHttpClient->invalidateCollectionObjectCache($apObject['likes']);
                 $collection = $this->apHttpClient->getCollectionObject($apObject['likes']);
                 if (isset($collection['totalItems']) && \is_int($collection['totalItems'])) {
                     return $collection['totalItems'];
@@ -1044,6 +1097,7 @@ class ActivityPubManager
     {
         if (!empty($apObject['dislikes'])) {
             if (false !== filter_var($apObject['dislikes'], FILTER_VALIDATE_URL)) {
+                $this->apHttpClient->invalidateCollectionObjectCache($apObject['dislikes']);
                 $collection = $this->apHttpClient->getCollectionObject($apObject['dislikes']);
                 if (isset($collection['totalItems']) && \is_int($collection['totalItems'])) {
                     return $collection['totalItems'];
@@ -1058,6 +1112,7 @@ class ActivityPubManager
     {
         if (!empty($apObject['shares'])) {
             if (false !== filter_var($apObject['shares'], FILTER_VALIDATE_URL)) {
+                $this->apHttpClient->invalidateCollectionObjectCache($apObject['shares']);
                 $collection = $this->apHttpClient->getCollectionObject($apObject['shares']);
                 if (isset($collection['totalItems']) && \is_int($collection['totalItems'])) {
                     return $collection['totalItems'];

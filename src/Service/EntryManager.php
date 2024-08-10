@@ -18,10 +18,12 @@ use App\Event\Entry\EntryDeletedEvent;
 use App\Event\Entry\EntryEditedEvent;
 use App\Event\Entry\EntryPinEvent;
 use App\Event\Entry\EntryRestoredEvent;
+use App\Exception\PostingRestrictedException;
 use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
 use App\Factory\EntryFactory;
 use App\Message\DeleteImageMessage;
+use App\Message\EntryEmbedMessage;
 use App\Repository\EntryRepository;
 use App\Repository\ImageRepository;
 use App\Service\ActivityPub\ApHttpClient;
@@ -43,6 +45,7 @@ class EntryManager implements ContentManagerInterface
 {
     public function __construct(
         private readonly LoggerInterface $logger,
+        private readonly SettingsManager $settingsManager,
         private readonly TagExtractor $tagExtractor,
         private readonly TagManager $tagManager,
         private readonly MentionManager $mentionManager,
@@ -67,6 +70,7 @@ class EntryManager implements ContentManagerInterface
      * @throws TagBannedException
      * @throws UserBannedException
      * @throws TooManyRequestsHttpException
+     * @throws PostingRestrictedException
      * @throws \Exception                   if title, body and image are empty
      */
     public function create(EntryDto $dto, User $user, bool $rateLimit = true, bool $stickyIt = false): Entry
@@ -77,6 +81,10 @@ class EntryManager implements ContentManagerInterface
 
         if ($this->tagManager->isAnyTagBanned($this->tagManager->extract($dto->body))) {
             throw new TagBannedException();
+        }
+
+        if ($dto->magazine->isActorPostingRestricted($user)) {
+            throw new PostingRestrictedException($dto->magazine, $user);
         }
 
         $this->logger->debug('creating entry from dto');
@@ -156,11 +164,21 @@ class EntryManager implements ContentManagerInterface
         return $entry;
     }
 
-    public function edit(Entry $entry, EntryDto $dto): Entry
+    public function canUserEditEntry(Entry $entry, User $user): bool
+    {
+        $entryHost = null !== $entry->apId ? parse_url($entry->apId, PHP_URL_HOST) : $this->settingsManager->get('KBIN_DOMAIN');
+        $userHost = null !== $user->apId ? parse_url($user->apProfileId, PHP_URL_HOST) : $this->settingsManager->get('KBIN_DOMAIN');
+        $magazineHost = null !== $entry->magazine->apId ? parse_url($entry->magazine->apProfileId, PHP_URL_HOST) : $this->settingsManager->get('KBIN_DOMAIN');
+
+        return $entryHost === $userHost || $userHost === $magazineHost || $entry->magazine->userIsModerator($user);
+    }
+
+    public function edit(Entry $entry, EntryDto $dto, User $editedBy): Entry
     {
         Assert::same($entry->magazine->getId(), $dto->magazine->getId());
 
         $entry->title = $dto->title;
+        $oldUrl = $entry->url;
         $entry->url = $dto->url;
         $entry->body = $dto->body;
         $entry->lang = $dto->lang;
@@ -196,7 +214,11 @@ class EntryManager implements ContentManagerInterface
             $this->bus->dispatch(new DeleteImageMessage($oldImage->getId()));
         }
 
-        $this->dispatcher->dispatch(new EntryEditedEvent($entry));
+        if ($entry->url !== $oldUrl) {
+            $this->bus->dispatch(new EntryEmbedMessage($entry->getId()));
+        }
+
+        $this->dispatcher->dispatch(new EntryEditedEvent($entry, $editedBy));
 
         return $entry;
     }

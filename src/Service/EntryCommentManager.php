@@ -42,6 +42,7 @@ class EntryCommentManager implements ContentManagerInterface
         private readonly MessageBusInterface $bus,
         private readonly EntityManagerInterface $entityManager,
         private readonly ImageRepository $imageRepository,
+        private readonly SettingsManager $settingsManager,
     ) {
     }
 
@@ -95,7 +96,16 @@ class EntryCommentManager implements ContentManagerInterface
         return $comment;
     }
 
-    public function edit(EntryComment $comment, EntryCommentDto $dto): EntryComment
+    public function canUserEditComment(EntryComment $comment, User $user): bool
+    {
+        $entryCommentHost = null !== $comment->apId ? parse_url($comment->apId, PHP_URL_HOST) : $this->settingsManager->get('KBIN_DOMAIN');
+        $userHost = null !== $user->apId ? parse_url($user->apProfileId, PHP_URL_HOST) : $this->settingsManager->get('KBIN_DOMAIN');
+        $magazineHost = null !== $comment->magazine->apId ? parse_url($comment->magazine->apProfileId, PHP_URL_HOST) : $this->settingsManager->get('KBIN_DOMAIN');
+
+        return $entryCommentHost === $userHost || $userHost === $magazineHost || $comment->magazine->userIsModerator($user);
+    }
+
+    public function edit(EntryComment $comment, EntryCommentDto $dto, ?User $editedByUser = null): EntryComment
     {
         Assert::same($comment->entry->getId(), $dto->entry->getId());
 
@@ -128,7 +138,7 @@ class EntryCommentManager implements ContentManagerInterface
             $this->bus->dispatch(new DeleteImageMessage($oldImage->getId()));
         }
 
-        $this->dispatcher->dispatch(new EntryCommentEditedEvent($comment));
+        $this->dispatcher->dispatch(new EntryCommentEditedEvent($comment, $editedByUser));
 
         return $comment;
     }

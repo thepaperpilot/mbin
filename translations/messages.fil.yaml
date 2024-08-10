@@ -176,7 +176,6 @@ status: Katayuan
 change_language: Baguhin ang wika
 change_magazine: baguhin ang magasin
 mark_as_adult: Markahin bilang NSFW
-inactive: Hindi aktibo
 registrations_enabled: Pinagana ang pagrehistro
 registration_disabled: Nakapatay ang pagrehistro
 report_issue: Iulat ang isyu
@@ -214,3 +213,9 @@ deletion: Pagbura
 delete_magazine: Burahin ang magasin
 details: Mga detalye
 deleted_by_author: Binura ng may-akda ang [thread], [post] o puna
+report_accepted: Natanggap ang isang ulat
+own_content_reported_accepted: Natanggap ang isang ulat ng iyong nilalaman.
+own_report_accepted: Natanggap ang iyong ulat
+own_report_rejected: Naitanggi ang iyong ulat
+reported_user: Iniulat na tagagamit
+reporting_user: Paguulat sa tagagamit
