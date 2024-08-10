@@ -17,6 +17,6 @@ oneup_flysystem:
 
   filesystems:
     public_uploads_filesystem:
-      adapter: default_adapter
-      #adapter: kbin.s3_adapter
+      #adapter: default_adapter
+      adapter: kbin.s3_adapter
       alias: League\Flysystem\Filesystem
