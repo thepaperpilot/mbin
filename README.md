@@ -98,21 +98,14 @@ For developers:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/nobodyatroot">
-                    <img src="https://avatars.githubusercontent.com/u/35878315?v=4" width="100;" alt="nobodyatroot"/>
-                    <br />
-                    <sub><b>debounced</b></sub>
-                </a>
-            </td>
-		</tr>
-		<tr>
-            <td align="center">
                 <a href="https://github.com/SzymonKaminski">
                     <img src="https://avatars.githubusercontent.com/u/8536735?v=4" width="100;" alt="SzymonKaminski"/>
                     <br />
                     <sub><b>SzymonKaminski</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/cooperaj">
                     <img src="https://avatars.githubusercontent.com/u/400210?v=4" width="100;" alt="cooperaj"/>
@@ -164,6 +157,8 @@ For developers:
                     <sub><b>Daniel Pervan</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/GauthierPLM">
                     <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
@@ -192,8 +187,6 @@ For developers:
                     <sub><b>Chris Hall</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/andrewmoise">
                     <img src="https://avatars.githubusercontent.com/u/8404538?v=4" width="100;" alt="andrewmoise"/>
@@ -201,6 +194,8 @@ For developers:
                     <sub><b>andrewmoise</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/garrettw">
                     <img src="https://avatars.githubusercontent.com/u/84885?v=4" width="100;" alt="garrettw"/>
@@ -236,6 +231,13 @@ For developers:
                     <sub><b>cavebob</b></sub>
                 </a>
             </td>
+            <td align="center">
+                <a href="https://github.com/jwr1">
+                    <img src="https://avatars.githubusercontent.com/u/47087725?v=4" width="100;" alt="jwr1"/>
+                    <br />
+                    <sub><b>John Wesley</b></sub>
+                </a>
+            </td>
 		</tr>
 		<tr>
             <td align="center">
@@ -267,21 +269,12 @@ For developers:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/jwr1">
-                    <img src="https://avatars.githubusercontent.com/u/47087725?v=4" width="100;" alt="jwr1"/>
-                    <br />
-                    <sub><b>John Wesley</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/DismalShadowX">
                     <img src="https://avatars.githubusercontent.com/u/24910097?v=4" width="100;" alt="DismalShadowX"/>
                     <br />
                     <sub><b>Nathan Sparrow</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/privacyguard">
                     <img src="https://avatars.githubusercontent.com/u/92675882?v=4" width="100;" alt="privacyguard"/>
