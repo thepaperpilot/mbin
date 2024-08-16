@@ -141,8 +141,6 @@ For developers:
                     <sub><b>Kingsley Yung</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/TheVillageGuy">
                     <img src="https://avatars.githubusercontent.com/u/47496248?v=4" width="100;" alt="TheVillageGuy"/>
@@ -150,6 +148,8 @@ For developers:
                     <sub><b>TheVillageGuy</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/danielpervan">
                     <img src="https://avatars.githubusercontent.com/u/5121830?v=4" width="100;" alt="danielpervan"/>
@@ -157,20 +157,18 @@ For developers:
                     <sub><b>Daniel Pervan</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/GauthierPLM">
-                    <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
-                    <br />
-                    <sub><b>Gauthier POGAM--LE MONTAGNER</b></sub>
-                </a>
-            </td>
             <td align="center">
                 <a href="https://github.com/Ahrotahn">
                     <img src="https://avatars.githubusercontent.com/u/40727284?v=4" width="100;" alt="Ahrotahn"/>
                     <br />
                     <sub><b>Ahrotahn</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/GauthierPLM">
+                    <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
+                    <br />
+                    <sub><b>Gauthier POGAM--LE MONTAGNER</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -211,17 +209,17 @@ For developers:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/ryanmonsen">
-                    <img src="https://avatars.githubusercontent.com/u/55466117?v=4" width="100;" alt="ryanmonsen"/>
+                <a href="https://github.com/lilfade">
+                    <img src="https://avatars.githubusercontent.com/u/4168401?v=4" width="100;" alt="lilfade"/>
                     <br />
-                    <sub><b>ryanmonsen</b></sub>
+                    <sub><b>Bryson</b></sub>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/drupol">
-                    <img src="https://avatars.githubusercontent.com/u/252042?v=4" width="100;" alt="drupol"/>
+                <a href="https://github.com/vpzomtrrfrt">
+                    <img src="https://avatars.githubusercontent.com/u/3528358?v=4" width="100;" alt="vpzomtrrfrt"/>
                     <br />
-                    <sub><b>Pol Dellaiera</b></sub>
+                    <sub><b>vpzomtrrfrt</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -241,17 +239,17 @@ For developers:
 		</tr>
 		<tr>
             <td align="center">
-                <a href="https://github.com/vpzomtrrfrt">
-                    <img src="https://avatars.githubusercontent.com/u/3528358?v=4" width="100;" alt="vpzomtrrfrt"/>
+                <a href="https://github.com/drupol">
+                    <img src="https://avatars.githubusercontent.com/u/252042?v=4" width="100;" alt="drupol"/>
                     <br />
-                    <sub><b>vpzomtrrfrt</b></sub>
+                    <sub><b>Pol Dellaiera</b></sub>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/lilfade">
-                    <img src="https://avatars.githubusercontent.com/u/4168401?v=4" width="100;" alt="lilfade"/>
+                <a href="https://github.com/ryanmonsen">
+                    <img src="https://avatars.githubusercontent.com/u/55466117?v=4" width="100;" alt="ryanmonsen"/>
                     <br />
-                    <sub><b>Bryson</b></sub>
+                    <sub><b>ryanmonsen</b></sub>
                 </a>
             </td>
             <td align="center">
