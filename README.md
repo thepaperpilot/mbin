@@ -148,6 +148,8 @@ For developers:
                     <sub><b>TheVillageGuy</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/danielpervan">
                     <img src="https://avatars.githubusercontent.com/u/5121830?v=4" width="100;" alt="danielpervan"/>
@@ -155,8 +157,6 @@ For developers:
                     <sub><b>Daniel Pervan</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/Ahrotahn">
                     <img src="https://avatars.githubusercontent.com/u/40727284?v=4" width="100;" alt="Ahrotahn"/>
@@ -202,6 +202,13 @@ For developers:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/jwr1">
+                    <img src="https://avatars.githubusercontent.com/u/47087725?v=4" width="100;" alt="jwr1"/>
+                    <br />
+                    <sub><b>John Wesley</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/piotr-sikora-v">
                     <img src="https://avatars.githubusercontent.com/u/1295000?v=4" width="100;" alt="piotr-sikora-v"/>
                     <br />
@@ -227,13 +234,6 @@ For developers:
                     <img src="https://avatars.githubusercontent.com/u/75441692?v=4" width="100;" alt="cavebob"/>
                     <br />
                     <sub><b>cavebob</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/jwr1">
-                    <img src="https://avatars.githubusercontent.com/u/47087725?v=4" width="100;" alt="jwr1"/>
-                    <br />
-                    <sub><b>John Wesley</b></sub>
                 </a>
             </td>
 		</tr>
