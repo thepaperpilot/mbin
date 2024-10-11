@@ -165,17 +165,17 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/Ahrotahn">
-                    <img src="https://avatars.githubusercontent.com/u/40727284?v=4" width="100;" alt="Ahrotahn"/>
-                    <br />
-                    <sub><b>Ahrotahn</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/GauthierPLM">
                     <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
                     <br />
                     <sub><b>Gauthier POGAM--LE MONTAGNER</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Ahrotahn">
+                    <img src="https://avatars.githubusercontent.com/u/40727284?v=4" width="100;" alt="Ahrotahn"/>
+                    <br />
+                    <sub><b>Ahrotahn</b></sub>
                 </a>
             </td>
             <td align="center">
