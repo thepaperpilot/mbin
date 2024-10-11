@@ -31,7 +31,7 @@
         {% endif %}
         {% if this.zitadelEnabled %}
             <a href="{{ path('oauth_zitadel_connect') }}" class="btn btn__secondary"><i class="fa-solid fa-lock" aria-hidden="true"></i>
-                <span>{{ 'continue_with'|trans }} Zitadel</span></a>
+                <span>{{ 'continue_with'|trans }} Incremental Social</span></a>
         {% endif %}
         {% if this.authentikEnabled %}
             <a href="{{ path('oauth_authentik_connect') }}" class="btn btn__secondary"><i class="si si-authentik" aria-hidden="true"></i>
@@ -49,8 +49,4 @@
     {% if not mbin_sso_only_mode() and mbin_sso_show_first() %}
     <div class="separator separator-show"></div>
     {% endif %}
-    {% if this.zitadelEnabled %}
-        <a href="{{ path('oauth_zitadel_connect') }}" class="btn btn__secondary"><i class="fa-solid fa-lock" aria-hidden="true"></i>
-            Login with Incremental Social</a>
-    {% endif %}
-</div>
+{% endif %}
