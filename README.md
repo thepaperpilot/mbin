@@ -128,17 +128,17 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/simonrcodrington">
-                    <img src="https://avatars.githubusercontent.com/u/12083338?v=4" width="100;" alt="simonrcodrington"/>
-                    <br />
-                    <sub><b>Simon Codrington</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/thepaperpilot">
                     <img src="https://avatars.githubusercontent.com/u/3683148?v=4" width="100;" alt="thepaperpilot"/>
                     <br />
                     <sub><b>Anthony Lawn</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/simonrcodrington">
+                    <img src="https://avatars.githubusercontent.com/u/12083338?v=4" width="100;" alt="simonrcodrington"/>
+                    <br />
+                    <sub><b>Simon Codrington</b></sub>
                 </a>
             </td>
             <td align="center">
