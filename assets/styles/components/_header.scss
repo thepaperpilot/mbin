@@ -242,7 +242,7 @@
     text-decoration: none;
     height: 100%;
 
-    @include media-breakpoint-down(lg) {
+    @include b.media-breakpoint-down(lg) {
       padding-left: 1em;
     }
 
@@ -366,7 +366,7 @@
       justify-content: center;
       color: #88C0D0;
       
-      @include media-breakpoint-down(lg) {
+      @include b.media-breakpoint-down(lg) {
         padding: 3px 0 0;
         min-width: 2.5rem;
       }
@@ -386,7 +386,7 @@
     }
   }
 
-  @include media-breakpoint-down(lg) {
+  @include b.media-breakpoint-down(lg) {
     nav {
       overflow: unset;
     }
