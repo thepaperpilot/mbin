@@ -164,6 +164,15 @@ Unofficial magazines:
                     <sub><b>Daniel Pervan</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/garrettw">
+                    <img src="https://avatars.githubusercontent.com/u/84885?v=4" width="100;" alt="garrettw"/>
+                    <br />
+                    <sub><b>Garrett W.</b></sub>
+                </a>
+            </td>
             <td align="center">
                 <a href="https://github.com/GauthierPLM">
                     <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
@@ -182,6 +191,13 @@ Unofficial magazines:
                 <a href="https://github.com/CocoPoops">
                     <img src="https://avatars.githubusercontent.com/u/7891055?v=4" width="100;" alt="CocoPoops"/>
                     <br />
+                    <sub><b>Ahrotahn</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/CocoPoops">
+                    <img src="https://avatars.githubusercontent.com/u/7891055?v=4" width="100;" alt="CocoPoops"/>
+                    <br />
                     <sub><b>CocoPoops</b></sub>
                 </a>
             </td>
@@ -192,20 +208,13 @@ Unofficial magazines:
                     <sub><b>Chris Hall</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/andrewmoise">
                     <img src="https://avatars.githubusercontent.com/u/8404538?v=4" width="100;" alt="andrewmoise"/>
                     <br />
                     <sub><b>andrewmoise</b></sub>
-                </a>
-            </td>
-		</tr>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/garrettw">
-                    <img src="https://avatars.githubusercontent.com/u/84885?v=4" width="100;" alt="garrettw"/>
-                    <br />
-                    <sub><b>Garrett W.</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -223,17 +232,24 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/lilfade">
-                    <img src="https://avatars.githubusercontent.com/u/4168401?v=4" width="100;" alt="lilfade"/>
+                <a href="https://github.com/ryanmonsen">
+                    <img src="https://avatars.githubusercontent.com/u/55466117?v=4" width="100;" alt="ryanmonsen"/>
                     <br />
-                    <sub><b>Bryson</b></sub>
+                    <sub><b>ryanmonsen</b></sub>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/vpzomtrrfrt">
-                    <img src="https://avatars.githubusercontent.com/u/3528358?v=4" width="100;" alt="vpzomtrrfrt"/>
+                <a href="https://github.com/drupol">
+                    <img src="https://avatars.githubusercontent.com/u/252042?v=4" width="100;" alt="drupol"/>
                     <br />
-                    <sub><b>vpzomtrrfrt</b></sub>
+                    <sub><b>Pol Dellaiera</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/jwr1">
+                    <img src="https://avatars.githubusercontent.com/u/47087725?v=4" width="100;" alt="jwr1"/>
+                    <br />
+                    <sub><b>John Wesley</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -246,17 +262,17 @@ Unofficial magazines:
 		</tr>
 		<tr>
             <td align="center">
-                <a href="https://github.com/drupol">
-                    <img src="https://avatars.githubusercontent.com/u/252042?v=4" width="100;" alt="drupol"/>
+                <a href="https://github.com/vpzomtrrfrt">
+                    <img src="https://avatars.githubusercontent.com/u/3528358?v=4" width="100;" alt="vpzomtrrfrt"/>
                     <br />
-                    <sub><b>Pol Dellaiera</b></sub>
+                    <sub><b>vpzomtrrfrt</b></sub>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/ryanmonsen">
-                    <img src="https://avatars.githubusercontent.com/u/55466117?v=4" width="100;" alt="ryanmonsen"/>
+                <a href="https://github.com/lilfade">
+                    <img src="https://avatars.githubusercontent.com/u/4168401?v=4" width="100;" alt="lilfade"/>
                     <br />
-                    <sub><b>ryanmonsen</b></sub>
+                    <sub><b>Bryson</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -307,7 +323,7 @@ See [docs.joinmbin.org](https://docs.joinmbin.org)
 - NGINX / Apache / Caddy
 - PostgreSQL
 - RabbitMQ
-- Redis / KeyDB
+- Valkey / KeyDB / Redis
 - Mercure (optional)
 
 ## Languages

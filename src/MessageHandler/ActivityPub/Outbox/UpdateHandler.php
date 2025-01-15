@@ -23,6 +23,7 @@ use App\Service\ActivityPubManager;
 use App\Service\DeliverManager;
 use App\Service\SettingsManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -36,8 +37,9 @@ class UpdateHandler extends MbinMessageHandler
         private readonly SettingsManager $settingsManager,
         private readonly DeliverManager $deliverManager,
         private readonly UpdateWrapper $updateWrapper,
+        private readonly KernelInterface $kernel,
     ) {
-        parent::__construct($this->entityManager);
+        parent::__construct($this->entityManager, $this->kernel);
     }
 
     public function __invoke(UpdateMessage $message): void
@@ -64,6 +66,11 @@ class UpdateHandler extends MbinMessageHandler
             $activity = $this->updateWrapper->buildForActivity($entity, $editedByUser);
 
             if ($entity instanceof Entry || $entity instanceof EntryComment || $entity instanceof Post || $entity instanceof PostComment) {
+                if ('random' === $entity->magazine->name) {
+                    // do not federate the random magazine
+                    return;
+                }
+
                 $inboxes = array_filter(array_unique(array_merge(
                     $this->userRepository->findAudience($entity->user),
                     $this->activityPubManager->createInboxesFromCC($activity, $entity->user),
@@ -82,6 +89,11 @@ class UpdateHandler extends MbinMessageHandler
             if ($entity instanceof User) {
                 $inboxes = $this->userRepository->findAudience($entity);
             } elseif ($entity instanceof Magazine) {
+                if ('random' === $entity->name) {
+                    // do not federate the random magazine
+                    return;
+                }
+
                 if (null === $entity->apId) {
                     $inboxes = $this->magazineRepository->findAudience($entity);
                     if (null !== $editedByUser) {

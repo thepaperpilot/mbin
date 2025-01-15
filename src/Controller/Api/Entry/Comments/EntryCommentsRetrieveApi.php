@@ -13,7 +13,7 @@ use App\PageView\EntryCommentPageView;
 use App\Repository\Criteria;
 use App\Repository\EntryCommentRepository;
 use App\Schema\PaginationSchema;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -155,8 +155,13 @@ class EntryCommentsRetrieveApi extends EntriesBaseApi
 
         $dtos = [];
         foreach ($comments->getCurrentPageResults() as $value) {
-            \assert($value instanceof EntryComment);
-            array_push($dtos, $this->serializeCommentTree($value));
+            try {
+                \assert($value instanceof EntryComment);
+                $this->handlePrivateContent($value);
+                array_push($dtos, $this->serializeCommentTree($value));
+            } catch (\Exception $e) {
+                continue;
+            }
         }
 
         return new JsonResponse(

@@ -26,6 +26,7 @@ use App\Service\ActivityPubManager;
 use App\Service\MessageManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -34,15 +35,16 @@ class CreateHandler extends MbinMessageHandler
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly KernelInterface $kernel,
         private readonly Note $note,
         private readonly Page $page,
         private readonly MessageBusInterface $bus,
         private readonly LoggerInterface $logger,
         private readonly MessageManager $messageManager,
         private readonly ActivityPubManager $activityPubManager,
-        private readonly ApActivityRepository $repository
+        private readonly ApActivityRepository $repository,
     ) {
-        parent::__construct($this->entityManager);
+        parent::__construct($this->entityManager, $this->kernel);
     }
 
     /**
@@ -73,20 +75,20 @@ class CreateHandler extends MbinMessageHandler
                 $this->handlePage($object, $stickyIt);
             }
         } catch (UserBannedException) {
-            $this->logger->info('Did not create the post, because the user is banned');
+            $this->logger->info('[CreateHandler::handleModeratorAdd] Did not create the post, because the user is banned');
         } catch (UserDeletedException) {
-            $this->logger->info('Did not create the post, because the user is deleted');
+            $this->logger->info('[CreateHandler::handleModeratorAdd] Did not create the post, because the user is deleted');
         } catch (TagBannedException) {
-            $this->logger->info('Did not create the post, because one of the used tags is banned');
+            $this->logger->info('[CreateHandler::handleModeratorAdd] Did not create the post, because one of the used tags is banned');
         } catch (PostingRestrictedException $e) {
             if ($e->actor instanceof User) {
                 $username = $e->actor->getUsername();
             } else {
                 $username = $e->actor->name;
             }
-            $this->logger->info('Did not create the post, because the magazine {m} restricts posting to mods and {u} is not a mod', ['m' => $e->magazine, 'u' => $username]);
+            $this->logger->info('[CreateHandler::handleModeratorAdd] Did not create the post, because the magazine {m} restricts posting to mods and {u} is not a mod', ['m' => $e->magazine, 'u' => $username]);
         } catch (InstanceBannedException $e) {
-            $this->logger->info('Did not create the post, because the user\'s instance is banned');
+            $this->logger->info('[CreateHandler::handleModeratorAdd] Did not create the post, because the user\'s instance is banned');
         }
     }
 

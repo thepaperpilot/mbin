@@ -7,8 +7,8 @@ namespace App\Controller\Api\User;
 use App\DTO\UserResponseDto;
 use App\Factory\UserFactory;
 use App\Service\UserManager;
-use Nelmio\ApiDocBundle\Annotation\Model;
-use Nelmio\ApiDocBundle\Annotation\Security;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
@@ -47,7 +47,7 @@ class UserDeleteImagesApi extends UserBaseApi
     public function avatar(
         UserManager $manager,
         UserFactory $factory,
-        RateLimiterFactory $apiImageLimiter
+        RateLimiterFactory $apiImageLimiter,
     ): JsonResponse {
         $headers = $this->rateLimit($apiImageLimiter);
 
@@ -90,7 +90,7 @@ class UserDeleteImagesApi extends UserBaseApi
     public function cover(
         UserManager $manager,
         UserFactory $factory,
-        RateLimiterFactory $apiImageLimiter
+        RateLimiterFactory $apiImageLimiter,
     ): JsonResponse {
         $headers = $this->rateLimit($apiImageLimiter);
 

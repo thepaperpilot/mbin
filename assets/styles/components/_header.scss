@@ -1,3 +1,5 @@
+@use '../layout/breakpoints' as b;
+
 #header {
   align-items: end;
   background: #2E3440;
@@ -30,7 +32,7 @@
     .dropdown__menu {
       display: block;
 
-      @include media-breakpoint-down(sm) {
+      @include b.media-breakpoint-down(sm) {
         left: auto;
         top: 100%;
         transform: none;
@@ -59,7 +61,7 @@
     }
   }
 
-  .kbin-container {
+  .mbin-container {
     display: grid;
     grid-template-areas: 'sr-nav brand magazine nav menu';
     grid-template-columns: min-content max-content max-content auto max-content;
@@ -88,7 +90,7 @@
 
   .login {
 
-    @include media-breakpoint-down(sm) {
+    @include b.media-breakpoint-down(sm) {
 
       white-space: nowrap;
 
@@ -114,7 +116,7 @@
       width: 1.5625rem;
     }
 
-    @include media-breakpoint-down(sm) {
+    @include b.media-breakpoint-down(sm) {
 
       .user-name {
         display: none;
@@ -177,7 +179,7 @@
         display: flex !important;
         white-space: nowrap;
   
-        @include media-breakpoint-down(sm) {
+        @include b.media-breakpoint-down(sm) {
           padding: 3px 0 0;
           min-width: 2.5rem;
         }
@@ -262,13 +264,13 @@
       }
     }
 
-    @include media-breakpoint-down(sm) {
+    @include b.media-breakpoint-down(sm) {
       #nav-toggle {
         min-width: 2.5rem;
       }
     }
 
-    @include media-breakpoint-down(lg) {
+    @include b.media-breakpoint-down(lg) {
 
       a {
         gap: .5rem;
@@ -318,7 +320,7 @@
       }
     }
 
-    @include media-breakpoint-down(lg) {
+    @include b.media-breakpoint-down(lg) {
       color: #D8DEE9;
 
       span {

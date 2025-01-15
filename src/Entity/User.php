@@ -10,11 +10,13 @@ use App\Entity\Contracts\VisibilityInterface;
 use App\Entity\Traits\ActivityPubActorTrait;
 use App\Entity\Traits\CreatedAtTrait;
 use App\Entity\Traits\VisibilityTrait;
+use App\Enums\EApplicationStatus;
 use App\Repository\UserRepository;
-use App\Service\ActivityPub\ApHttpClient;
+use App\Service\ActivityPub\ApHttpClientInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -151,6 +153,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
     public bool $notifyOnNewPostReply = true;
     #[Column(type: 'boolean', nullable: false)]
     public bool $notifyOnNewPostCommentReply = true;
+    #[Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    public bool $notifyOnUserSignup = true;
     #[Column(type: 'boolean', nullable: false, options: ['default' => false])]
     public bool $addMentionsEntries = false;
     #[Column(type: 'boolean', nullable: false, options: ['default' => true])]
@@ -223,6 +227,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
     public Collection $notifications;
     #[OneToMany(mappedBy: 'user', targetEntity: UserPushSubscription::class, fetch: 'EXTRA_LAZY')]
     public Collection $pushSubscriptions;
+    #[OneToMany(mappedBy: 'user', targetEntity: BookmarkList::class, fetch: 'EXTRA_LAZY')]
+    public Collection $bookmarkLists;
     #[Id]
     #[GeneratedValue]
     #[Column(type: 'integer')]
@@ -238,13 +244,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
     #[Column(type: 'string', nullable: false, options: ['default' => self::USER_TYPE_PERSON])]
     public string $type;
 
+    #[Column(type: 'text', nullable: true)]
+    public ?string $applicationText;
+
+    #[Column(type: 'enumApplicationStatus', nullable: false, options: ['default' => EApplicationStatus::Approved->value])]
+    private string $applicationStatus;
+
     public function __construct(
         string $email,
         string $username,
         string $password,
         string $type,
         ?string $apProfileId = null,
-        ?string $apId = null
+        ?string $apId = null,
+        EApplicationStatus $applicationStatus = EApplicationStatus::Approved,
+        ?string $applicationText = null,
     ) {
         $this->email = $email;
         $this->password = $password;
@@ -278,6 +292,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
         $this->lastActive = new \DateTime();
         $this->createdAtTraitConstruct();
         $this->oAuth2UserConsents = new ArrayCollection();
+        $this->setApplicationStatus($applicationStatus);
+        $this->applicationText = $applicationText;
     }
 
     public function getId(): int
@@ -357,7 +373,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
         // Magazines
         $magazines = $tokens->map(fn ($token) => $token->magazine);
         $criteria = Criteria::create()
-            ->orderBy(['lastActive' => Criteria::DESC]);
+            ->orderBy(['lastActive' => Order::Descending]);
 
         return $magazines->matching($criteria);
     }
@@ -868,7 +884,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
         return $this->magazineOwnershipRequests->matching($criteria)->count() > 0;
     }
 
-    public function getFollowerUrl(ApHttpClient $client, UrlGeneratorInterface $urlGenerator, bool $isRemote): ?string
+    public function getFollowerUrl(ApHttpClientInterface $client, UrlGeneratorInterface $urlGenerator, bool $isRemote): ?string
     {
         if ($isRemote) {
             $actorObject = $client->getActorObject($this->apProfileId);
@@ -893,5 +909,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Visibil
         } else {
             return $this->apDomain === $actor->apDomain;
         }
+    }
+
+    public function getApplicationStatus(): EApplicationStatus
+    {
+        return EApplicationStatus::getFromString($this->applicationStatus);
+    }
+
+    public function setApplicationStatus(EApplicationStatus $applicationStatus): void
+    {
+        $this->applicationStatus = $applicationStatus->value;
     }
 }
