@@ -1,7 +1,6 @@
 import { fetch, ok } from '../utils/http';
 import getIntIdFromElement, { getDepth, getLevel, getTypeFromNotification } from '../utils/mbin';
 import { Controller } from '@hotwired/stimulus';
-import GLightbox from 'glightbox';
 import router from '../utils/routing';
 import { useIntersection } from 'stimulus-use';
 
@@ -16,9 +15,6 @@ export default class extends Controller {
     static sendBtnLabel = null;
 
     connect() {
-        const params = { selector: '.thumb', openEffect: 'none', closeEffect: 'none', slideEffect: 'none' };
-        GLightbox(params);
-
         const self = this;
         if (this.hasMoreTarget) {
             this.moreTarget.addEventListener('focusin', () => {
@@ -36,6 +32,28 @@ export default class extends Controller {
         }
 
         this.checkHeight();
+
+        // if in a list and the click is made via touch, open the post
+        if (!this.element.classList.contains('isSingle')) {
+            this.element.querySelector('.content')?.addEventListener('click', (e) => {
+                if (e.defaultPrevented) {
+                    return
+                }
+                if ('a' === e.target.nodeName?.toLowerCase() || 'a' === e.target.tagName?.toLowerCase()) {
+                    // ignore clicks on links
+                    return
+                }
+                if ('touch' === e.pointerType) {
+                    const link = this.element.querySelector("header a:not(.user-inline)")
+                    if (link) {
+                        const href = link.getAttribute('href')
+                        if (href) {
+                            document.location.href = href
+                        }
+                    }
+                }
+            })
+        }
     }
 
     async getForm(event) {
@@ -194,46 +212,6 @@ export default class extends Controller {
             event.target.closest('.vote').outerHTML = response.html;
         } catch (e) {
             form.submit();
-        } finally {
-            this.loadingValue = false;
-        }
-    }
-
-    /**
-     * Calls the address attached to the nearest link node. Replaces the outer html of the nearest `cssclass` parameter
-     * with the response from the link
-     */
-    async linkCallback(event) {
-        const { cssclass: cssClass, refreshlink: refreshLink, refreshselector: refreshSelector } = event.params
-        event.preventDefault();
-
-        const a = event.target.closest('a');
-
-        try {
-            this.loadingValue = true;
-
-            let response = await fetch(a.href, {
-                method: 'GET',
-            });
-
-            response = await ok(response);
-            response = await response.json();
-
-            event.target.closest(`.${cssClass}`).outerHTML = response.html;
-
-            const refreshElement = this.element.querySelector(refreshSelector)
-            console.log("linkCallback refresh stuff", refreshLink, refreshSelector, refreshElement)
-
-            if (!!refreshLink && refreshLink !== "" && !!refreshElement) {
-                let response = await fetch(refreshLink, {
-                    method: 'GET',
-                });
-
-                response = await ok(response);
-                response = await response.json();
-                refreshElement.outerHTML = response.html;
-            }
-        } catch (e) {
         } finally {
             this.loadingValue = false;
         }
@@ -445,6 +423,7 @@ export default class extends Controller {
                 e.target.previousSibling.scrollIntoView();
                 this.isExpandedValue = false;
             }
+            e.preventDefault();
         });
     }
 
