@@ -105,6 +105,7 @@ jobs:
           DATABASE_PORT: 5432
           REDIS_HOST: valkey
           REDIS_PORT: 6379
+          CREATE_SNAPSHOTS: false
         run: php vendor/bin/paratest tests/Unit
 
       - name: Run non thread safe integration tests
@@ -204,8 +205,11 @@ jobs:
       - name: Composer tools install
         run: composer -d tools install --no-scripts --no-progress
 
-      - name: php-cs-fixer dry-run
-        run: tools/vendor/bin/php-cs-fixer fix --dry-run -v --show-progress=none #--format=checkstyle #would be nice if codeberg did something with this like github does.
+      - name: PHP CS Fixer dry-run with diff
+        run: tools/vendor/bin/php-cs-fixer fix --dry-run --diff --show-progress=none
+
+      - name: PHP CS Fixer to PR Annotations
+        run: tools/vendor/bin/php-cs-fixer fix --dry-run --format=checkstyle --show-progress=none | cs2pr
 
   build-and-publish-docker-image:
     runs-on: ubuntu-latest

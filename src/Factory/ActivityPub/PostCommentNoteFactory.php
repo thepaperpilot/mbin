@@ -58,10 +58,11 @@ class PostCommentNoteFactory
                 ActivityPubActivityInterface::PUBLIC_URL,
             ],
             'cc' => $cc,
+            'audience' => $this->groupFactory->getActivityPubId($comment->magazine),
             'sensitive' => $comment->post->isAdult(),
             'content' => $this->markdownConverter->convertToHtml(
                 $comment->body,
-                [MarkdownConverter::RENDER_TARGET => RenderTarget::ActivityPub],
+                context: [MarkdownConverter::RENDER_TARGET => RenderTarget::ActivityPub],
             ),
             'mediaType' => 'text/html',
             'source' => $comment->body ? [

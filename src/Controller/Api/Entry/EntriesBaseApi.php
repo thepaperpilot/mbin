@@ -17,6 +17,7 @@ use App\Entity\EntryComment;
 use App\Entity\Magazine;
 use App\Enums\ENotificationStatus;
 use App\Factory\EntryCommentFactory;
+use App\PageView\EntryCommentPageView;
 use App\Service\EntryManager;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -76,7 +77,7 @@ class EntriesBaseApi extends BaseApi
         $deserialized = $this->serializer->deserialize($this->request->getCurrentRequest()->getContent(), EntryRequestDto::class, 'json', $context);
         \assert($deserialized instanceof EntryRequestDto);
 
-        $dto = $deserialized->mergeIntoDto($dto);
+        $dto = $deserialized->mergeIntoDto($dto, $this->settingsManager);
 
         $dto->ip = $this->ipResolver->resolve();
 
@@ -148,7 +149,7 @@ class EntriesBaseApi extends BaseApi
 
         $dto->ip = $this->ipResolver->resolve();
 
-        return $deserialized->mergeIntoDto($dto);
+        return $deserialized->mergeIntoDto($dto, $this->settingsManager);
     }
 
     protected function deserializeCommentFromForm(?EntryCommentDto $dto = null): EntryCommentDto
@@ -162,7 +163,7 @@ class EntriesBaseApi extends BaseApi
 
         $dto->ip = $this->ipResolver->resolve();
 
-        return $deserialized->mergeIntoDto($dto);
+        return $deserialized->mergeIntoDto($dto, $this->settingsManager);
     }
 
     /**
@@ -173,7 +174,7 @@ class EntriesBaseApi extends BaseApi
      *
      * @return array An associative array representation of the comment's hierarchy, to be used as JSON
      */
-    protected function serializeCommentTree(?EntryComment $comment, ?int $depth = null): array
+    protected function serializeCommentTree(?EntryComment $comment, EntryCommentPageView $commentPageView, ?int $depth = null): array
     {
         if (null === $comment) {
             return [];
@@ -187,7 +188,7 @@ class EntriesBaseApi extends BaseApi
             $canModerate = $comment->getMagazine()->userIsModerator($user) || $user->isModerator() || $user->isAdmin();
         }
 
-        $commentTree = $this->commentsFactory->createResponseTree($comment, $depth, $canModerate);
+        $commentTree = $this->commentsFactory->createResponseTree($comment, $commentPageView, $depth, $canModerate);
         $commentTree->canAuthUserModerate = $canModerate;
 
         return $commentTree->jsonSerialize();

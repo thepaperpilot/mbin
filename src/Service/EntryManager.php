@@ -18,6 +18,7 @@ use App\Event\Entry\EntryDeletedEvent;
 use App\Event\Entry\EntryEditedEvent;
 use App\Event\Entry\EntryPinEvent;
 use App\Event\Entry\EntryRestoredEvent;
+use App\Exception\InstanceBannedException;
 use App\Exception\PostingRestrictedException;
 use App\Exception\TagBannedException;
 use App\Exception\UserBannedException;
@@ -71,6 +72,7 @@ class EntryManager implements ContentManagerInterface
      * @throws UserBannedException
      * @throws TooManyRequestsHttpException
      * @throws PostingRestrictedException
+     * @throws InstanceBannedException
      * @throws \Exception                   if title, body and image are empty
      */
     public function create(EntryDto $dto, User $user, bool $rateLimit = true, bool $stickyIt = false): Entry
@@ -85,6 +87,10 @@ class EntryManager implements ContentManagerInterface
 
         if ($dto->magazine->isActorPostingRestricted($user)) {
             throw new PostingRestrictedException($dto->magazine, $user);
+        }
+
+        if (null !== $dto->magazine->apId && $this->settingsManager->isBannedInstance($dto->magazine->apInboxUrl)) {
+            throw new InstanceBannedException();
         }
 
         $this->logger->debug('creating entry from dto');
@@ -187,8 +193,10 @@ class EntryManager implements ContentManagerInterface
         $entry->slug = $this->slugger->slug($dto->title);
         $entry->visibility = $dto->visibility;
         $oldImage = $entry->image;
-        if ($dto->image) {
-            $entry->image = $this->imageRepository->find($dto->image->id);
+        $entry->image = $dto->image ? $this->imageRepository->find($dto->image->id) : null;
+        $this->logger->debug('setting image to {imageId}, dto was {dtoImageId}', ['imageId' => $entry->image?->getId() ?? 'none', 'dtoImageId' => $dto->image?->id ?? 'none']);
+        if ($entry->image && !$entry->image->altText) {
+            $entry->image->altText = $dto->imageAlt;
         }
         $this->tagManager->updateEntryTags($entry, $this->tagManager->getTagsFromEntryDto($dto));
 

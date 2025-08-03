@@ -13,6 +13,7 @@ use App\DTO\PostRequestDto;
 use App\DTO\PostResponseDto;
 use App\Entity\PostComment;
 use App\Enums\ENotificationStatus;
+use App\PageView\PostCommentPageView;
 
 class PostsBaseApi extends BaseApi
 {
@@ -58,7 +59,7 @@ class PostsBaseApi extends BaseApi
         ]);
         \assert($deserialized instanceof PostRequestDto);
 
-        $dto = $deserialized->mergeIntoDto($dto);
+        $dto = $deserialized->mergeIntoDto($dto, $this->settingsManager);
 
         return $dto;
     }
@@ -72,7 +73,7 @@ class PostsBaseApi extends BaseApi
         $deserialized->lang = $request->get('lang');
         $deserialized->isAdult = filter_var($request->get('isAdult'), FILTER_VALIDATE_BOOL);
 
-        $dto = $deserialized->mergeIntoDto($dto);
+        $dto = $deserialized->mergeIntoDto($dto, $this->settingsManager);
 
         return $dto;
     }
@@ -124,7 +125,7 @@ class PostsBaseApi extends BaseApi
 
         \assert($deserialized instanceof PostCommentRequestDto);
 
-        return $deserialized->mergeIntoDto($dto);
+        return $deserialized->mergeIntoDto($dto, $this->settingsManager);
     }
 
     protected function deserializePostCommentFromForm(?PostCommentDto $dto = null): PostCommentDto
@@ -135,7 +136,7 @@ class PostsBaseApi extends BaseApi
         $deserialized->body = $request->get('body');
         $deserialized->lang = $request->get('lang');
 
-        $dto = $deserialized->mergeIntoDto($dto);
+        $dto = $deserialized->mergeIntoDto($dto, $this->settingsManager);
 
         return $dto;
     }
@@ -148,7 +149,7 @@ class PostsBaseApi extends BaseApi
      *
      * @return array An associative array representation of the comment's hierarchy, to be used as JSON
      */
-    protected function serializePostCommentTree(?PostComment $comment, ?int $depth = null): array
+    protected function serializePostCommentTree(?PostComment $comment, PostCommentPageView $commentPageView, ?int $depth = null): array
     {
         if (null === $comment) {
             return [];
@@ -163,7 +164,7 @@ class PostsBaseApi extends BaseApi
             $canModerate = $comment->getMagazine()->userIsModerator($user) || $user->isModerator() || $user->isAdmin();
         }
 
-        $commentTree = $this->postCommentFactory->createResponseTree($comment, $depth, $canModerate);
+        $commentTree = $this->postCommentFactory->createResponseTree($comment, $commentPageView, $depth, $canModerate);
         $commentTree->canAuthUserModerate = $canModerate;
 
         return $commentTree->jsonSerialize();

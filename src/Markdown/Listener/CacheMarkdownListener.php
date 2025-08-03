@@ -8,13 +8,13 @@ declare(strict_types=1);
 
 namespace App\Markdown\Listener;
 
-use App\Markdown\CommonMark\CommunityLinkParser;
 use App\Markdown\Event\BuildCacheContext;
 use App\Markdown\Event\ConvertMarkdown;
 use App\Repository\ApActivityRepository;
 use App\Repository\MagazineRepository;
 use App\Repository\UserRepository;
 use App\Service\MentionManager;
+use App\Utils\RegPatterns;
 use App\Utils\UrlUtils;
 use League\CommonMark\Output\RenderedContentInterface;
 use Psr\Cache\CacheException;
@@ -58,10 +58,14 @@ final class CacheMarkdownListener implements EventSubscriberInterface
     public function preConvertMarkdown(ConvertMarkdown $event): void
     {
         $request = $this->requestStack->getCurrentRequest();
+        if (null === $request) {
+            $this->logger->debug('[ConvertMarkdown] request is null]');
+        }
         $cacheEvent = new BuildCacheContext($event, $request);
         $this->dispatcher->dispatch($cacheEvent);
 
-        $item = $this->pool->getItem($cacheEvent->getCacheKey());
+        $key = $cacheEvent->getCacheKey();
+        $item = $this->pool->getItem($key);
 
         if ($item->isHit()) {
             $content = $item->get();
@@ -99,7 +103,7 @@ final class CacheMarkdownListener implements EventSubscriberInterface
 
                 $tags = array_unique(array_merge($urls, $mentions, $magazineMentions));
 
-                $this->logger->debug('added tags {t} to markdown "{m}"', ['t' => $tags, 'm' => $md]);
+                $this->logger->debug('added tags {t} to markdown "{m}"', ['t' => join(', ', $tags), 'm' => $md]);
 
                 $item->tag($tags);
             }
@@ -114,14 +118,11 @@ final class CacheMarkdownListener implements EventSubscriberInterface
     /** @return string[] */
     private function getMissingUrlsFromMarkdown(string $markdown): array
     {
-        $words = preg_split('/[ \n\[\]()]/', $markdown);
         $urls = [];
-        foreach ($words as $word) {
-            if (filter_var($word, FILTER_VALIDATE_URL)) {
-                $entity = $this->activityRepository->findByObjectId($word);
-                if (null === $entity) {
-                    $urls[] = $word;
-                }
+        foreach (UrlUtils::extractUrlsFromString($markdown) as $url) {
+            $entity = $this->activityRepository->findByObjectId($url);
+            if (null === $entity) {
+                $urls[] = $url;
             }
         }
 
@@ -146,15 +147,30 @@ final class CacheMarkdownListener implements EventSubscriberInterface
     /** @return string[] */
     private function getMissingMagazineMentions(string $markdown): array
     {
-        $words = preg_split('/[ \n\[\]()]/', $markdown);
+        // No-break space is causing issues with word splitting. So replace a no-break (0xc2 0xa0) by a normal space first.
+        $words = preg_split('/[ \n\[\]()]/', str_replace(\chr(194).\chr(160), '&nbsp;', $markdown));
         $missingCommunityMentions = [];
         foreach ($words as $word) {
             $matches = null;
-            if (preg_match('/'.CommunityLinkParser::COMMUNITY_REGEX.'/', $word, $matches)) {
+            // Remove newline (\n), tab (\t), carriage return (\r), etc.
+            $word2 = preg_replace('/[[:cntrl:]]/', '', $word);
+            if (preg_match('/'.RegPatterns::COMMUNITY_REGEX.'/', $word2, $matches)) {
+                // Check if the required matched array keys exist
+                if (!isset($matches[1]) || !isset($matches[2])) {
+                    $this->logger->warning('Invalid community mention format: {word}', ['word' => $word2]);
+                    // Just skip and continue
+                    continue;
+                }
+
                 $apId = "$matches[1]@$matches[2]";
-                $magazine = $this->magazineRepository->findOneBy(['apId' => $apId]);
-                if (!$magazine) {
-                    $missingCommunityMentions[] = $apId;
+                $this->logger->debug("searching for magazine '{m}', original word: '{w}', word without cntrl: '{w2}'", ['m' => $apId, 'w' => $word, 'w2' => $word2]);
+                try {
+                    $magazine = $this->magazineRepository->findOneBy(['apId' => $apId]);
+                    if (!$magazine) {
+                        $missingCommunityMentions[] = $apId;
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->error('An error occurred while looking for magazine "{m}": {t} - {msg}', ['m' => $apId, 't' => \get_class($e), 'msg' => $e->getMessage()]);
                 }
             }
         }

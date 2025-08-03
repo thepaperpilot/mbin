@@ -65,11 +65,12 @@ class PostNoteFactory
                 ActivityPubActivityInterface::PUBLIC_URL,
             ],
             'cc' => $cc,
+            'audience' => $this->groupFactory->getActivityPubId($post->magazine),
             'sensitive' => $post->isAdult(),
             'stickied' => $post->sticky,
             'content' => $this->markdownConverter->convertToHtml(
                 $body,
-                [MarkdownConverter::RENDER_TARGET => RenderTarget::ActivityPub],
+                context: [MarkdownConverter::RENDER_TARGET => RenderTarget::ActivityPub],
             ),
             'mediaType' => 'text/html',
             'source' => $post->body ? [

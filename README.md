@@ -101,17 +101,17 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/asdfzdfj">
-                    <img src="https://avatars.githubusercontent.com/u/20770492?v=4" width="100;" alt="asdfzdfj"/>
-                    <br />
-                    <sub><b>asdfzdfj</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/weblate">
                     <img src="https://avatars.githubusercontent.com/u/1607653?v=4" width="100;" alt="weblate"/>
                     <br />
                     <sub><b>Weblate (bot)</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/asdfzdfj">
+                    <img src="https://avatars.githubusercontent.com/u/20770492?v=4" width="100;" alt="asdfzdfj"/>
+                    <br />
+                    <sub><b>asdfzdfj</b></sub>
                 </a>
             </td>
 		</tr>
@@ -175,17 +175,17 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/GauthierPLM">
-                    <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
-                    <br />
-                    <sub><b>Gauthier POGAM--LE MONTAGNER</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/Ahrotahn">
                     <img src="https://avatars.githubusercontent.com/u/40727284?v=4" width="100;" alt="Ahrotahn"/>
                     <br />
                     <sub><b>Ahrotahn</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/GauthierPLM">
+                    <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
+                    <br />
+                    <sub><b>Gauthier POGAM--LE MONTAGNER</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -196,14 +196,28 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/jwr1">
+                    <img src="https://avatars.githubusercontent.com/u/47087725?v=4" width="100;" alt="jwr1"/>
+                    <br />
+                    <sub><b>John Wesley</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/thepaperpilot">
+                    <img src="https://avatars.githubusercontent.com/u/3683148?v=4" width="100;" alt="thepaperpilot"/>
+                    <br />
+                    <sub><b>Anthony Lawn</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/chall8908">
                     <img src="https://avatars.githubusercontent.com/u/315948?v=4" width="100;" alt="chall8908"/>
                     <br />
                     <sub><b>Chris Hall</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/jwr1">
                     <img src="https://avatars.githubusercontent.com/u/47087725?v=4" width="100;" alt="jwr1"/>
@@ -240,14 +254,21 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/MakaryGo">
+                    <img src="https://avatars.githubusercontent.com/u/24472656?v=4" width="100;" alt="MakaryGo"/>
+                    <br />
+                    <sub><b>Makary</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
                 <a href="https://github.com/cavebob">
                     <img src="https://avatars.githubusercontent.com/u/75441692?v=4" width="100;" alt="cavebob"/>
                     <br />
                     <sub><b>cavebob</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/vpzomtrrfrt">
                     <img src="https://avatars.githubusercontent.com/u/3528358?v=4" width="100;" alt="vpzomtrrfrt"/>
@@ -283,15 +304,22 @@ Unofficial magazines:
                     <sub><b>Mark Heath</b></sub>
                 </a>
             </td>
-            <td align="center">
-                <a href="https://github.com/DismalShadowX">
-                    <img src="https://avatars.githubusercontent.com/u/24910097?v=4" width="100;" alt="DismalShadowX"/>
-                    <br />
-                    <sub><b>Nathan Sparrow</b></sub>
-                </a>
-            </td>
 		</tr>
 		<tr>
+            <td align="center">
+                <a href="https://github.com/robertolopezlopez">
+                    <img src="https://avatars.githubusercontent.com/u/1519467?v=4" width="100;" alt="robertolopezlopez"/>
+                    <br />
+                    <sub><b>Roberto López López</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/olorin99">
+                    <img src="https://avatars.githubusercontent.com/u/36951539?v=4" width="100;" alt="olorin99"/>
+                    <br />
+                    <sub><b>olorin99</b></sub>
+                </a>
+            </td>
             <td align="center">
                 <a href="https://github.com/privacyguard">
                     <img src="https://avatars.githubusercontent.com/u/92675882?v=4" width="100;" alt="privacyguard"/>
@@ -327,6 +355,7 @@ See [docs.joinmbin.org](https://docs.joinmbin.org)
 Following languages are currently supported/translated:
 
 - Bulgarian
+- Catalan
 - Chinese
 - Danish
 - Dutch

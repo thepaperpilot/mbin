@@ -59,9 +59,10 @@ class EntryPageFactory
             ],
             'cc' => $cc,
             'name' => $entry->title,
+            'audience' => $this->groupFactory->getActivityPubId($entry->magazine),
             'content' => $entry->body ? $this->markdownConverter->convertToHtml(
                 $entry->body,
-                [MarkdownConverter::RENDER_TARGET => RenderTarget::ActivityPub]
+                context: [MarkdownConverter::RENDER_TARGET => RenderTarget::ActivityPub]
             ) : null,
             'summary' => $entry->getShortTitle().' '.implode(
                 ' ',
@@ -72,7 +73,6 @@ class EntryPageFactory
                 'content' => $entry->body,
                 'mediaType' => 'text/markdown',
             ] : null,
-            'url' => $this->getUrl($entry),
             'tag' => array_merge(
                 $this->tagsWrapper->build($tags),
                 $this->mentionsWrapper->build($entry->mentions ?? [], $entry->body)

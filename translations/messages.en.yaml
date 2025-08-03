@@ -32,7 +32,7 @@ subscribers_count: '{0}Subscribers|{1}Subscriber|]1,Inf[ Subscribers'
 followers_count: '{0}Followers|{1}Follower|]1,Inf[ Followers'
 marked_for_deletion: Marked for deletion
 marked_for_deletion_at: Marked for deletion at %date%
-favourites: Favorites
+favourites: Upvotes
 favourite: Favorite
 more: More
 avatar: Avatar
@@ -370,6 +370,7 @@ instance: Instance
 pages: Pages
 FAQ: FAQ
 type_search_term: Type search term
+type_search_term_url_handle: Type search term, url or handle
 federation_enabled: Federation enabled
 registrations_enabled: Registration enabled
 registration_disabled: Registration disabled
@@ -415,7 +416,8 @@ preferred_languages: Filter languages of threads and posts
 infinite_scroll_help: Automatically load more content when you reach the bottom of
   the page.
 sticky_navbar_help: The navbar will stick to the top of the page when you scroll down.
-auto_preview_help: Show the media (photo, video) previews in a larger size below the content.
+auto_preview_help: Show the media (photo, video) previews in a larger size below the
+  content.
 reload_to_apply: Reload page to apply changes
 filter.origin.label: Choose origin
 filter.fields.label: Choose which fields to search
@@ -455,6 +457,7 @@ toolbar.unordered_list: Unordered List
 toolbar.ordered_list: Ordered List
 toolbar.mention: Mention
 toolbar.spoiler: Spoiler
+toolbar.emoji: Emoji
 federation_page_enabled: Federation page enabled
 federation_page_allowed_description: Known instances we federate with
 federation_page_disallowed_description: Instances we do not federate with
@@ -744,6 +747,7 @@ two_factor_backup: Two-factor authentication backup codes
   and will be able to use each of them <strong>only once</strong>.
 2fa.backup_codes.recommendation: It is recommended that you keep a copy of them in
   a safe place.
+2fa.manual_code_hint: If you cannot scan the QR code, enter the secret manually
 cancel: Cancel
 password_and_2fa: Password & 2FA
 flash_account_settings_changed: Your account settings have been successfully changed.
@@ -934,14 +938,18 @@ bookmarks_list_edit: Edit bookmark list
 bookmark_list_edit: Edit
 bookmark_list_selected_list: Selected list
 table_of_contents: Table of contents
-search_type_all: Threads + Microblogs
+search_type_all: Everything
 search_type_entry: Threads
 search_type_post: Microblogs
+search_type_magazine: Magazines
+search_type_user: Users
+search_type_actors: Magazines + Users
+search_type_content: Threads + Microblogs
 select_user: Choose a user
 new_users_need_approval: New users have to be approved by an admin before they can
   log in.
 signup_requests: Signup requests
-application_text: Application text
+application_text: Explain why you want to join
 signup_requests_header: Signup Requests
 signup_requests_paragraph: These users would like to join your server. They cannot
   log in until you've approved their signup request.
@@ -965,10 +973,27 @@ front_default_sort: Frontpage default sort
 comment_default_sort: Comment default sort
 open_signup_request: Open signup request
 image_lightbox_in_list: Thread thumbnails opens full screen
-compact_view_help: A compact view with less margins, where the media is moved to the right side.
+compact_view_help: A compact view with less margins, where the media is moved to the
+  right side.
 show_users_avatars_help: Display the user avatar image.
 show_magazines_icons_help: Display the magazine icon.
 show_thumbnails_help: Show the thumbnail images.
-image_lightbox_in_list_help: When checked, clicking the thumbnail shows a modal image box window. When unchecked, clicking the thumbnail will open the thread.
+image_lightbox_in_list_help: When checked, clicking the thumbnail shows a modal image
+  box window. When unchecked, clicking the thumbnail will open the thread.
 show_new_icons: Show new icons
 show_new_icons_help: Show icon for new magazine/user (30 days old or newer)
+magazine_instance_defederated_info: The instance of this magazine is defederated.
+  The magazine will therefore not receive updates.
+user_instance_defederated_info: The instance of this user is defederated.
+flash_thread_instance_banned: The instance of this magazine is banned.
+show_rich_mention: Rich mentions
+show_rich_mention_help: Render a user component when a user is mentioned.
+  This will include their display name and profile picture.
+show_rich_mention_magazine: Rich magazine mentions
+show_rich_mention_magazine_help: Render a magazine component when a magazine is mentioned.
+  This will include their display name and icon.
+show_rich_ap_link: Rich AP links
+show_rich_ap_link_help: Render an inline component when other ActivityPub content is linked to.
+attitude: Attitude
+type_search_magazine: Limit search to magazine...
+type_search_user: Limit search to author...

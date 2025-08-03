@@ -10,7 +10,7 @@ There is also a **very good** [forum post on activitypub.rocks](https://socialhu
 
 ## How to setup my own Mbin instance?
 
-Have a look at our guides. A bare metal/VM setup is **recommended** at this time, however we do provide a Docker setup as well.
+Have a look at our guides. Both a bare metal/VM setup and a Docker setup is provided.
 
 ## I have an issue!
 
@@ -152,6 +152,8 @@ _Hint:_ Most messages that are stored in the database are most likely in the `fa
 
 You can find the Mbin logging in the `var/log/` directory from the root folder of the Mbin installation. When running production the file is called `prod-{YYYY-MM-DD}.log`, when running development the log file is called `dev-{YYYY-MM-DD}.log`.
 
+See also [troubleshooting (bare metal)](./05-troubleshooting/01-bare_metal.md).
+
 ## Should I run development mode?
 
 **NO!** Try to avoid running development mode when you are hosting our own _public_ instance. Running in development mode can cause sensitive data to be leaked, such as secret keys or passwords (eg. via development console). Development mode will log a lot of messages to disk (incl. stacktraces).
@@ -174,7 +176,7 @@ Followed by restarting the services that are depending on the (new) configuratio
 
 ```bash
 # Clear PHP Opcache by restarting the PHP FPM service
-sudo systemctl restart php8.2-fpm.service
+sudo systemctl restart php8.4-fpm.service
 
 # Restarting the PHP messenger jobs and Mercure service (also reread the latest configuration)
 sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl restart all
@@ -207,7 +209,7 @@ To verify that assumption:
 
 1. stop all messengers
    - if you're on bare metal, as root: `supervisorctl stop messenger:*`
-   - if you're on docker, inside the `docker` folder : `docker compose down messenger*`
+   - if you're on docker: `docker compose down messenger`
 2. look again at the publishing rate. If it has gone down, then it definitely is a circulating message
 
 To fix the problem:
