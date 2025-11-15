@@ -34,12 +34,7 @@ class EntriesRetrieveApi extends EntriesBaseApi
     #[OA\Response(
         response: 200,
         description: 'Returns the Entry',
-        content: new Model(type: EntryResponseDto::class),
-        headers: [
-            new OA\Header(header: 'X-RateLimit-Remaining', schema: new OA\Schema(type: 'integer'), description: 'Number of requests left until you will be rate limited'),
-            new OA\Header(header: 'X-RateLimit-Retry-After', schema: new OA\Schema(type: 'integer'), description: 'Unix timestamp to retry the request after'),
-            new OA\Header(header: 'X-RateLimit-Limit', schema: new OA\Schema(type: 'integer'), description: 'Number of requests available'),
-        ]
+        content: new Model(type: EntryResponseDto::class)
     )]
     #[OA\Response(
         response: 401,
@@ -106,12 +101,7 @@ class EntriesRetrieveApi extends EntriesBaseApi
                     ref: new Model(type: PaginationSchema::class)
                 ),
             ]
-        ),
-        headers: [
-            new OA\Header(header: 'X-RateLimit-Remaining', schema: new OA\Schema(type: 'integer'), description: 'Number of requests left until you will be rate limited'),
-            new OA\Header(header: 'X-RateLimit-Retry-After', schema: new OA\Schema(type: 'integer'), description: 'Unix timestamp to retry the request after'),
-            new OA\Header(header: 'X-RateLimit-Limit', schema: new OA\Schema(type: 'integer'), description: 'Number of requests available'),
-        ]
+        )
     )]
     #[OA\Response(
         response: 401,
@@ -242,12 +232,7 @@ class EntriesRetrieveApi extends EntriesBaseApi
                     ref: new Model(type: PaginationSchema::class)
                 ),
             ]
-        ),
-        headers: [
-            new OA\Header(header: 'X-RateLimit-Remaining', schema: new OA\Schema(type: 'integer'), description: 'Number of requests left until you will be rate limited'),
-            new OA\Header(header: 'X-RateLimit-Retry-After', schema: new OA\Schema(type: 'integer'), description: 'Unix timestamp to retry the request after'),
-            new OA\Header(header: 'X-RateLimit-Limit', schema: new OA\Schema(type: 'integer'), description: 'Number of requests available'),
-        ]
+        )
     )]
     #[OA\Response(
         response: 401,
@@ -363,12 +348,7 @@ class EntriesRetrieveApi extends EntriesBaseApi
                     ref: new Model(type: PaginationSchema::class)
                 ),
             ]
-        ),
-        headers: [
-            new OA\Header(header: 'X-RateLimit-Remaining', schema: new OA\Schema(type: 'integer'), description: 'Number of requests left until you will be rate limited'),
-            new OA\Header(header: 'X-RateLimit-Retry-After', schema: new OA\Schema(type: 'integer'), description: 'Unix timestamp to retry the request after'),
-            new OA\Header(header: 'X-RateLimit-Limit', schema: new OA\Schema(type: 'integer'), description: 'Number of requests available'),
-        ]
+        )
     )]
     #[OA\Response(
         response: 401,
@@ -484,12 +464,7 @@ class EntriesRetrieveApi extends EntriesBaseApi
                     ref: new Model(type: PaginationSchema::class)
                 ),
             ]
-        ),
-        headers: [
-            new OA\Header(header: 'X-RateLimit-Remaining', schema: new OA\Schema(type: 'integer'), description: 'Number of requests left until you will be rate limited'),
-            new OA\Header(header: 'X-RateLimit-Retry-After', schema: new OA\Schema(type: 'integer'), description: 'Unix timestamp to retry the request after'),
-            new OA\Header(header: 'X-RateLimit-Limit', schema: new OA\Schema(type: 'integer'), description: 'Number of requests available'),
-        ]
+        )
     )]
     #[OA\Response(
         response: 401,
