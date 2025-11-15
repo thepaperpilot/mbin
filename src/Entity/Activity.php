@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Controller\ActivityPub\ObjectController;
 use App\Entity\Contracts\ActivityPubActivityInterface;
 use App\Entity\Contracts\ActivityPubActorInterface;
+use App\Entity\Traits\CreatedAtTrait;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\CustomIdGenerator;
 use Doctrine\ORM\Mapping\Entity;
@@ -19,6 +20,10 @@ use Symfony\Component\Uid\Uuid;
 #[Entity]
 class Activity
 {
+    use CreatedAtTrait {
+        CreatedAtTrait::__construct as createdAtTraitConstruct;
+    }
+
     #[Column(type: 'uuid'), Id, GeneratedValue(strategy: 'CUSTOM')]
     #[CustomIdGenerator(class: 'doctrine.uuid_generator')]
     public Uuid $uuid;
@@ -39,7 +44,7 @@ class Activity
     public ?Magazine $magazineActor;
 
     #[ManyToOne, JoinColumn(nullable: true, onDelete: 'CASCADE')]
-    public ?Magazine $audience;
+    public ?Magazine $audience = null;
 
     #[ManyToOne, JoinColumn(referencedColumnName: 'uuid', nullable: true, onDelete: 'CASCADE', options: ['default' => null])]
     public ?Activity $innerActivity = null;
@@ -68,6 +73,9 @@ class Activity
     #[ManyToOne, JoinColumn(nullable: true, onDelete: 'CASCADE')]
     public ?Magazine $objectMagazine = null;
 
+    #[ManyToOne, JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    public ?MagazineBan $objectMagazineBan = null;
+
     #[Column(type: 'text', nullable: true)]
     public ?string $objectGeneric = null;
 
@@ -86,9 +94,10 @@ class Activity
     public function __construct(string $type)
     {
         $this->type = $type;
+        $this->createdAtTraitConstruct();
     }
 
-    public function setObject(ActivityPubActivityInterface|Entry|EntryComment|Post|PostComment|ActivityPubActorInterface|User|Magazine|Activity|array|string $object): void
+    public function setObject(ActivityPubActivityInterface|Entry|EntryComment|Post|PostComment|ActivityPubActorInterface|User|Magazine|MagazineBan|Activity|array|string $object): void
     {
         if ($object instanceof Entry) {
             $this->objectEntry = $object;
@@ -104,6 +113,8 @@ class Activity
             $this->objectUser = $object;
         } elseif ($object instanceof Magazine) {
             $this->objectMagazine = $object;
+        } elseif ($object instanceof MagazineBan) {
+            $this->objectMagazineBan = $object;
         } elseif ($object instanceof Activity) {
             $this->innerActivity = $object;
         } elseif (\is_array($object)) {
@@ -118,9 +129,9 @@ class Activity
         }
     }
 
-    public function getObject(): Post|EntryComment|PostComment|Entry|Message|User|Magazine|array|string|null
+    public function getObject(): Post|EntryComment|PostComment|Entry|Message|User|Magazine|MagazineBan|array|string|null
     {
-        $o = $this->objectEntry ?? $this->objectEntryComment ?? $this->objectPost ?? $this->objectPostComment ?? $this->objectMessage ?? $this->objectUser ?? $this->objectMagazine;
+        $o = $this->objectEntry ?? $this->objectEntryComment ?? $this->objectPost ?? $this->objectPostComment ?? $this->objectMessage ?? $this->objectUser ?? $this->objectMagazine ?? $this->objectMagazineBan;
         if (null !== $o) {
             return $o;
         }

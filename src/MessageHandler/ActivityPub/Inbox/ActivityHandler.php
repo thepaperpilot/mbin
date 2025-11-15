@@ -12,6 +12,7 @@ use App\Exception\InvalidUserPublicKeyException;
 use App\Message\ActivityPub\Inbox\ActivityMessage;
 use App\Message\ActivityPub\Inbox\AddMessage;
 use App\Message\ActivityPub\Inbox\AnnounceMessage;
+use App\Message\ActivityPub\Inbox\BlockMessage;
 use App\Message\ActivityPub\Inbox\CreateMessage;
 use App\Message\ActivityPub\Inbox\DeleteMessage;
 use App\Message\ActivityPub\Inbox\DislikeMessage;
@@ -78,6 +79,7 @@ class ActivityHandler extends MbinMessageHandler
                 $this->signatureValidator->validate($message->request, $message->headers, $message->payload);
             } catch (InboxForwardingException $exception) {
                 $this->logger->info("[ActivityHandler::doWork] The message was forwarded by {receivedFrom}. Dispatching a new activity message '{origin}'", ['receivedFrom' => $exception->receivedFrom, 'origin' => $exception->realOrigin]);
+
                 if (!$this->settingsManager->isBannedInstance($exception->realOrigin)) {
                     $body = $this->apHttpClient->getActivityObject($exception->realOrigin, false);
                     $this->bus->dispatch(new ActivityMessage($body));
@@ -231,6 +233,9 @@ class ActivityHandler extends MbinMessageHandler
             case 'Flag':
                 $this->bus->dispatch(new FlagMessage($payload));
                 break;
+            case 'Block':
+                $this->bus->dispatch(new BlockMessage($payload));
+                break;
         }
     }
 
@@ -255,6 +260,9 @@ class ActivityHandler extends MbinMessageHandler
             case 'Dislike':
                 $this->bus->dispatch(new DislikeMessage($payload));
                 break;
+            case 'Block':
+                $this->bus->dispatch(new BlockMessage($payload));
+                break;
         }
     }
 
@@ -275,7 +283,7 @@ class ActivityHandler extends MbinMessageHandler
     {
         if (!\is_null($id) && \in_array(
             str_replace('www.', '', parse_url($id, PHP_URL_HOST)),
-            $this->settingsManager->get('KBIN_BANNED_INSTANCES') ?? []
+            $this->instanceRepository->getBannedInstanceUrls()
         )) {
             return false;
         }

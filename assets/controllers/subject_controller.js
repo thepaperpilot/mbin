@@ -10,50 +10,17 @@ export default class extends Controller {
     static targets = ['loader', 'more', 'container', 'commentsCounter', 'favCounter', 'upvoteCounter', 'downvoteCounter'];
     static values = {
         loading: Boolean,
-        isExpandedValue: Boolean,
     };
     static sendBtnLabel = null;
 
     connect() {
-        const self = this;
-        if (this.hasMoreTarget) {
-            this.moreTarget.addEventListener('focusin', () => {
-                self.element.parentNode
-                    .querySelectorAll('.z-5')
-                    .forEach((el) => {
-                        el.classList.remove('z-5');
-                    });
-                this.element.classList.add('z-5');
-            });
-        }
+        this.wireMoreFocusClassAdjustment();
 
         if (this.element.classList.contains('show-preview')) {
             useIntersection(this);
         }
 
-        this.checkHeight();
-
-        // if in a list and the click is made via touch, open the post
-        if (!this.element.classList.contains('isSingle')) {
-            this.element.querySelector('.content')?.addEventListener('click', (e) => {
-                if (e.defaultPrevented) {
-                    return
-                }
-                if ('a' === e.target.nodeName?.toLowerCase() || 'a' === e.target.tagName?.toLowerCase()) {
-                    // ignore clicks on links
-                    return
-                }
-                if ('touch' === e.pointerType) {
-                    const link = this.element.querySelector("header a:not(.user-inline)")
-                    if (link) {
-                        const href = link.getAttribute('href')
-                        if (href) {
-                            document.location.href = href
-                        }
-                    }
-                }
-            })
-        }
+        this.wireTouchEvent();
     }
 
     async getForm(event) {
@@ -94,7 +61,7 @@ export default class extends Controller {
 
                 textarea.focus();
             }
-        } catch (e) {
+        } catch {
             window.location.href = event.target.href;
         } finally {
             this.loadingValue = false;
@@ -186,7 +153,7 @@ export default class extends Controller {
             response = await response.json();
 
             form.innerHTML = response.html;
-        } catch (e) {
+        } catch {
             form.submit();
         } finally {
             this.loadingValue = false;
@@ -210,7 +177,7 @@ export default class extends Controller {
             response = await response.json();
 
             event.target.closest('.vote').outerHTML = response.html;
-        } catch (e) {
+        } catch {
             form.submit();
         } finally {
             this.loadingValue = false;
@@ -257,7 +224,7 @@ export default class extends Controller {
             response = await response.json();
 
             this.element.querySelector('.moderate-inline').insertAdjacentHTML('afterbegin', response.html);
-        } catch (e) {
+        } catch {
             window.location.href = event.target.href;
         } finally {
             this.loadingValue = false;
@@ -312,7 +279,7 @@ export default class extends Controller {
 
             div.firstElementChild.className = this.element.className;
             this.element.outerHTML = div.firstElementChild.outerHTML;
-        } catch (e) {
+        } catch {
         } finally {
             this.loadingValue = false;
         }
@@ -357,12 +324,12 @@ export default class extends Controller {
             let response = await fetch(event.target.parentNode.formAction, { method: 'POST' });
 
             response = await ok(response);
-            response = await response.json();
+            await response.json();
 
             event.target.parentNode.previousElementSibling.remove();
             event.target.parentNode.nextElementSibling.classList.remove('hidden');
             event.target.parentNode.remove();
-        } catch (e) {
+        } catch {
         } finally {
             this.loadingValue = false;
         }
@@ -382,54 +349,48 @@ export default class extends Controller {
         this.previewInit = true;
     }
 
-    checkHeight() {
-        this.isExpandedValue = false;
-        const elem = this.element.querySelector('.content');
-        if (elem) {
-            elem.style.maxHeight = '25rem';
-
-            if (elem.scrollHeight - 30 > elem.clientHeight
-                || elem.scrollWidth > elem.clientWidth) {
-
-                this.moreBtn = this.createMoreBtn(elem);
-                this.more();
-            } else {
-                elem.style.maxHeight = null;
-            }
+    wireMoreFocusClassAdjustment() {
+        const self = this;
+        if (this.hasMoreTarget) {
+            this.moreTarget.addEventListener('focusin', () => {
+                self.element.parentNode
+                    .querySelectorAll('.z-5')
+                    .forEach((el) => {
+                        el.classList.remove('z-5');
+                    });
+                this.element.classList.add('z-5');
+            });
         }
     }
 
-    createMoreBtn(elem) {
-        const moreBtn = document.createElement('div');
-        moreBtn.innerHTML = '<i class="fa-solid fa-angles-down"></i>';
-        moreBtn.classList.add('more');
-
-        elem.parentNode.insertBefore(moreBtn, elem.nextSibling);
-
-        return moreBtn;
-    }
-
-    more() {
-        this.moreBtn.addEventListener('click', (e) => {
-            if (e.target.previousSibling.style.maxHeight) {
-                e.target.previousSibling.setAttribute('style', 'margin-bottom: 2rem !important');
-                e.target.previousSibling.style.maxHeight = null;
-                e.target.innerHTML = '<i class="fa-solid fa-angles-up"></i>';
-                this.isExpandedValue = true;
-            } else {
-                e.target.previousSibling.style.maxHeight = '25rem';
-                e.target.previousSibling.style.marginBottom = null;
-                e.target.innerHTML = '<i class="fa-solid fa-angles-down"></i>';
-                e.target.previousSibling.scrollIntoView();
-                this.isExpandedValue = false;
-            }
-            e.preventDefault();
-        });
-    }
-
-    expand() {
-        if (!this.isExpandedValue) {
-            this.moreBtn.click();
+    wireTouchEvent() {
+        // if in a list and the click is made via touch, open the post
+        if (!this.element.classList.contains('isSingle')) {
+            this.element.querySelector('.content')?.addEventListener('click', (e) => {
+                if (e.defaultPrevented) {
+                    return;
+                }
+                if ('a' === e.target.nodeName?.toLowerCase() || 'a' === e.target.tagName?.toLowerCase()) {
+                    // ignore clicks on links
+                    return;
+                }
+                if (
+                    'details' === e.target.nodeName?.toLowerCase() || 'details' === e.target.tagName?.toLowerCase()
+                    || 'summary' === e.target.nodeName?.toLowerCase() || 'summary' === e.target.tagName?.toLowerCase()
+                ) {
+                    // ignore clicks on spoilers
+                    return;
+                }
+                if ('touch' === e.pointerType) {
+                    const link = this.element.querySelector('header a:not(.user-inline)');
+                    if (link) {
+                        const href = link.getAttribute('href');
+                        if (href) {
+                            document.location.href = href;
+                        }
+                    }
+                }
+            });
         }
     }
 }

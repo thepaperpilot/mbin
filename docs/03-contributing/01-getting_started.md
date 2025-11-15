@@ -35,9 +35,65 @@ To save yourself much time setting up a development server, you can use our Dock
 > [!TIP]
 > Once you are done with your development server and would like to shutdown the Docker containers, hit `Ctrl+C` in your terminal.
 
-If you'd prefer a development setup without using Docker, then continue on to the next sections.
+If you'd prefer a development setup without using Docker, then continue on the section [Bare metal installation](#bare-metal-installation).
 
-## Initial setup
+## Dev Container
+
+This project also provides a configuration to create a Dev Container which can be launched from IDEs which support it.
+To use it, follow these steps:
+
+1. If you are using Podman, then uncomment the lines below `Uncomment if you are using Podman` in `./.devcontainer/devcontainer.json`
+2. Adjust values in: `./.devcontainer/.env.devcontainer`:
+   1. `SERVER_NAME`: change `mbin.domain.tld` to `localhost`
+   2. `KBIN_DOMAIN`: change to `localhost`
+   3. `KBIN_STORAGE_URL`: change `https://mbin.domain.tld/media` to `http://localhost:8080/media` (or whatever port you set in `devcontainer.json`)
+3. Start and open the Dev Container
+4. Run `chmod o+rwx public/`
+5. Check if all needed services are running: `sudo service --status-all`; services which should have a `+`:
+   - apache2
+   - apache-htcacheclean
+   - postgresql
+   - rabbitmq-server
+   - redis-server
+6. If some service are not running, try:
+   - Start it with `sudo service <service name> start`
+   - If postgres fails: `sudo chmod -R postgres:postgres /var/lib/postgresql/`
+7. Run `php -d memory_limit=-1 bin/console doctrine:migrations:migrate`
+8. Run `npm install && npm run dev`
+9. Open `http://localhost:8080` in a browser; you should see some status page or the Mbin startpage
+10. Run `sudo find public/ -type d -exec chgrp www-data '{}' \;` and `sudo find public/ -type d -exec chmod g+rwx '{}' \;`
+11. You can now follow the [initial configuration guide](../02-admin/04-running-mbin/01-first_setup.md)
+
+> [!TIP]
+> If you get at some point an error with `Expected to find class <class name and path> while importing services from resource "../src/", but it was not found!`
+> you can fix this by running `composer dump-autoload`.
+
+### OAuth keys
+
+If you want to use OAuth for the API, do the following **before** creating the Dev Container:
+1. Generate the key material by following *OAuth2 keys for API credential grants* in [Bare Metal/VM Installation](../02-admin/01-installation/01-bare_metal.md)
+2. Configure the described env variables in: `./.devcontainer/.env.devcontainer` (they are already declared at the end of the file)
+3. After the Dev Container is created and opened:
+   1. Run `chgrp www-data ./config/oauth2/private.pem`
+   2. Run `chmod g+r ./config/oauth2/private.pem`
+
+### Running tests
+
+To run test inside the Dev Container, some preparation is needed.
+These steps have to be repeated after every recreation of the Container:
+
+1. Run: `sudo pg_createcluster 13 tests --port=5433 --start`
+2. Run: `sudo su postgres -c 'psql -p 5433 -U postgres -d postgres'`
+3. Inside the SQL shell, run: `CREATE USER mbin WITH PASSWORD 'ChangeThisPostgresPass' SUPERUSER;`
+
+Now the testsuite can be launched with:
+`SYMFONY_DEPRECATIONS_HELPER=disabled php -d memory_limit=-1 ./bin/phpunit tests/Unit`
+or: `SYMFONY_DEPRECATIONS_HELPER=disabled php -d memory_limit=-1 ./bin/phpunit tests/Functional/<path to tests to run>`.\
+For more information, read the [Testing](#testing) section on this page.
+
+## Bare metal installation
+
+### Initial setup
 
 Requirements:
 
@@ -102,7 +158,7 @@ xdebug.max_nesting_level=512
 sudo systemctl restart php8.4-fpm.service
 ```
 
-## Prepare PostgreSQL DB
+### Prepare PostgreSQL DB
 
 1. Install PostgreSQL:
 
@@ -203,7 +259,7 @@ Please note, that the command may take some time and data will not be visible du
 - Omit `--append` flag to override data currently stored in the database
 - Customize inserted data by editing files inside `src/DataFixtures` directory
 
-## Starting the development server
+### Starting the development server
 
 Prepare the server:
 
@@ -277,10 +333,22 @@ To start the services in the background:
 docker compose -f docker/tests/compose.yaml up -d
 ```
 
-Then run the integration test(s):
+Then run all the integration test(s):
 
 ```sh
 SYMFONY_DEPRECATIONS_HELPER=disabled ./bin/phpunit tests/Functional
+```
+
+Or maybe better, run the non-thread-safe group using `phpunit`:
+
+```sh
+SYMFONY_DEPRECATIONS_HELPER=disabled ./bin/phpunit tests/Functional --group NonThreadSafe
+```
+
+And run the remaining thread-safe integration tests using `paratest`, which runs the test in parallel:
+
+```sh
+SYMFONY_DEPRECATIONS_HELPER=disabled php vendor/bin/paratest tests/Functional --exclude-group NonThreadSafe
 ```
 
 ## Linting

@@ -175,7 +175,7 @@ help: Ajuda
 check_email: Comproveu la vostra bústia electrònica
 reset_check_email_desc: Si ja hi ha un compte associat a la vostra adreça 
   electrònica, rebreu un correu electrònic en breu amb un enllaç que podeu 
-  utilitzar per restablir la vostra contrasenya. Este enllaç caducarà a 
+  utilitzar per restablir la vostra contrasenya. Este enllaç caducarà en 
   %expire%.
 up_vote: Impulsar
 down_vote: Votar en contra
@@ -266,9 +266,9 @@ restored_thread_by: ha restaurat un fil de
 removed_comment_by: ha eliminat un comentari de
 restored_comment_by: ha restaurat el comentari de
 removed_post_by: ha eliminat una publicació de
-he_banned: vetar
-he_unbanned: retirar vet
-read_all: Llegir-ho tot
+he_banned: vetat(da)
+he_unbanned: vet retirat
+read_all: Marcar-ho tot com a llegit
 show_all: Mostrar-ho tot
 flash_register_success: Benvinguda a bord! El vostre compte ja està registrat. 
   Un últim pas - consulteu la vostra safata d'entrada per a rebre un enllaç 
@@ -533,8 +533,7 @@ show_avatars_on_comments_help: Mostrar/amagar els avatars quan es veuen
 comment_reply_position: Posició del comentari de resposta
 magazine_theme_appearance_custom_css: CSS personalitzat que s'aplicarà quan 
   visualitzeu contingut a la vostra revista.
-magazine_theme_appearance_icon: Icona personalitzada per a la revista. Si no 
-  se'n selecciona cap, s'utilitzarà la icona predeterminada.
+magazine_theme_appearance_icon: Icona personalitzada per a la revista.
 moderation.report.ban_user_title: Vetar compte
 moderation.report.approve_report_confirmation: Confirmeu l'aprovació d'aquest 
   informe?
@@ -740,7 +739,7 @@ your_account_is_not_yet_approved: El vostre compte encara no s'ha aprovat.
   sol·licitud de registre.
 toolbar.link: Enllaç
 on: Encés
-purge: Purgar
+purge: Buidar la llista
 reject: Rebutjar
 instances: Instàncies
 from_url: Des de l'URL
@@ -1101,3 +1100,30 @@ search_type_actors: Revistes i comptes
 search_type_content: Temes i microblogs
 type_search_magazine: Limitar la cerca a la revista...
 type_search_user: Limitar la cerca a l'autoria...
+modlog_type_entry_deleted: Fil suprimit
+modlog_type_entry_restored: Fil restaurat
+modlog_type_entry_comment_deleted: Comentari del fil suprimit
+modlog_type_entry_comment_restored: Comentari del fil restaurat
+modlog_type_entry_pinned: Fil fixat
+modlog_type_entry_unpinned: Fil deixat de fixar
+modlog_type_post_deleted: Microblog suprimit
+modlog_type_post_restored: Microblog restaurat
+modlog_type_post_comment_deleted: Resposta del microblog suprimida
+modlog_type_post_comment_restored: Resposta del microblog restaurada
+modlog_type_ban: Compte expulsat de la revista
+modlog_type_moderator_add: Moderador(a) de la revista afegit(da)
+modlog_type_moderator_remove: Moderador(a) de la revista destituït(da)
+everyone: Tot el món
+nobody: Ningú
+followers_only: Només seguidor(e)s
+direct_message_setting_label: Qui pot enviar un missatge directe
+banner: Bàner
+magazine_theme_appearance_banner: Bàner personalitzat per a la revista. Es 
+  mostra damunt de tots els fils de discussió i ha de tindre una relació 
+  d'aspecte ampla (5:1 ó 1500 px * 300 px).
+delete_magazine_icon: Icona de suprimir revista
+flash_magazine_theme_icon_detached_success: La icona de la revista s'ha suprimit
+  correctament
+delete_magazine_banner: Suprimir el bàner de la revista
+flash_magazine_theme_banner_detached_success: El bàner de la revista s'ha 
+  suprimit correctament

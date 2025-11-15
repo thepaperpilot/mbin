@@ -63,6 +63,12 @@ class PostsCreateApi extends PostsBaseApi
             new OA\Header(header: 'X-RateLimit-Limit', schema: new OA\Schema(type: 'integer'), description: 'Number of requests available'),
         ]
     )]
+    #[OA\Parameter(
+        name: 'magazine_id',
+        description: 'The magazine to create the post in. Use the id of the "random" magazine to submit posts which should not be posted to a specific magazine.',
+        in: 'path',
+        schema: new OA\Schema(type: 'integer'),
+    )]
     #[OA\RequestBody(content: new Model(
         type: PostRequestDto::class,
         groups: [
@@ -105,7 +111,7 @@ class PostsCreateApi extends PostsBaseApi
         $post = $manager->create($dto, $this->getUserOrThrow(), rateLimit: false);
 
         return new JsonResponse(
-            $this->serializePost($manager->createDto($post), $this->tagLinkRepository->getTagsOfPost($post)),
+            $this->serializePost($manager->createDto($post), $this->tagLinkRepository->getTagsOfContent($post)),
             status: 201,
             headers: $headers
         );
@@ -145,6 +151,12 @@ class PostsCreateApi extends PostsBaseApi
             new OA\Header(header: 'X-RateLimit-Retry-After', schema: new OA\Schema(type: 'integer'), description: 'Unix timestamp to retry the request after'),
             new OA\Header(header: 'X-RateLimit-Limit', schema: new OA\Schema(type: 'integer'), description: 'Number of requests available'),
         ]
+    )]
+    #[OA\Parameter(
+        name: 'magazine_id',
+        description: 'The magazine to create the post in. Use the id of the "random" magazine to submit posts which should not be posted to a specific magazine.',
+        in: 'path',
+        schema: new OA\Schema(type: 'integer'),
     )]
     #[OA\RequestBody(content: new OA\MediaType(
         'multipart/form-data',
@@ -201,7 +213,7 @@ class PostsCreateApi extends PostsBaseApi
         $post = $manager->create($dto, $this->getUserOrThrow(), rateLimit: false);
 
         return new JsonResponse(
-            $this->serializePost($manager->createDto($post), $this->tagLinkRepository->getTagsOfPost($post)),
+            $this->serializePost($manager->createDto($post), $this->tagLinkRepository->getTagsOfContent($post)),
             status: 201,
             headers: $headers
         );

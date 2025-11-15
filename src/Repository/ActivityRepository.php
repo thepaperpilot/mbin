@@ -7,17 +7,23 @@ namespace App\Repository;
 use App\Entity\Activity;
 use App\Entity\Contracts\ActivityPubActivityInterface;
 use App\Entity\Contracts\ActivityPubActorInterface;
+use App\Entity\Contracts\VisibilityInterface;
 use App\Entity\Entry;
 use App\Entity\EntryComment;
 use App\Entity\Magazine;
+use App\Entity\MagazineBan;
 use App\Entity\Message;
 use App\Entity\Post;
 use App\Entity\PostComment;
 use App\Entity\User;
+use App\Pagination\Pagerfanta;
+use App\Pagination\QueryAdapter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Pagerfanta\Adapter\ArrayAdapter;
+use Pagerfanta\PagerfantaInterface;
 
 /**
  * @method Activity|null find($id, $lockMode = null, $lockVersion = null)
@@ -35,7 +41,7 @@ class ActivityRepository extends ServiceEntityRepository
         parent::__construct($registry, Activity::class);
     }
 
-    public function findFirstActivitiesByTypeAndObject(string $type, ActivityPubActivityInterface|ActivityPubActorInterface $object): ?Activity
+    public function findFirstActivitiesByTypeAndObject(string $type, ActivityPubActivityInterface|ActivityPubActorInterface|MagazineBan $object): ?Activity
     {
         $results = $this->findAllActivitiesByTypeAndObject($type, $object);
         if (!empty($results)) {
@@ -48,13 +54,47 @@ class ActivityRepository extends ServiceEntityRepository
     /**
      * @return Activity[]|null
      */
-    public function findAllActivitiesByTypeAndObject(string $type, ActivityPubActivityInterface|ActivityPubActorInterface $object): ?array
+    public function findAllActivitiesByTypeAndObject(string $type, ActivityPubActivityInterface|ActivityPubActorInterface|MagazineBan $object): ?array
     {
         $qb = $this->createQueryBuilder('a');
         $qb->where('a.type = :type');
         $qb->setParameter('type', $type);
 
         $this->addObjectFilter($qb, $object);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findFirstActivitiesByTypeObjectAndActor(string $type, ActivityPubActivityInterface|ActivityPubActorInterface $object, ActivityPubActorInterface $actor): ?Activity
+    {
+        $results = $this->findAllActivitiesByTypeObjectAndActor($type, $object, $actor);
+        if (!empty($results)) {
+            return $results[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * @return Activity[]|null
+     */
+    public function findAllActivitiesByTypeObjectAndActor(string $type, ActivityPubActivityInterface|ActivityPubActorInterface $object, ActivityPubActorInterface $actor): ?array
+    {
+        $qb = $this->createQueryBuilder('a');
+        $qb->where('a.type = :type');
+        $qb->setParameter('type', $type);
+
+        $this->addObjectFilter($qb, $object);
+
+        if ($actor instanceof User) {
+            $qb->andWhere('a.userActor = :user');
+            $qb->setParameter('user', $actor);
+        } elseif ($actor instanceof Magazine) {
+            $qb->andWhere('a.magazineActor = :magazine');
+            $qb->setParameter('magazine', $actor);
+        } else {
+            throw new \LogicException('Only magazine and user actors supported');
+        }
 
         return $qb->getQuery()->getResult();
     }
@@ -71,7 +111,7 @@ class ActivityRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    private function addObjectFilter(QueryBuilder $qb, ActivityPubActivityInterface|ActivityPubActorInterface $object): void
+    private function addObjectFilter(QueryBuilder $qb, ActivityPubActivityInterface|ActivityPubActorInterface|MagazineBan $object): void
     {
         if ($object instanceof Entry) {
             $qb->andWhere('a.objectEntry = :entry')
@@ -94,7 +134,39 @@ class ActivityRepository extends ServiceEntityRepository
         } elseif ($object instanceof Magazine) {
             $qb->andWhere('a.objectMagazine = :magazine')
                 ->setParameter('magazine', $object);
+        } elseif ($object instanceof MagazineBan) {
+            $qb->andWhere('a.objectMagazineBan = :magazineBan')
+                ->setParameter('magazineBan', $object);
         }
+    }
+
+    public function getOutboxActivitiesOfUser(User $user): PagerfantaInterface
+    {
+        if ($user->isDeleted || $user->isBanned || $user->isTrashed() || null !== $user->markedForDeletionAt) {
+            return new Pagerfanta(new ArrayAdapter([]));
+        }
+
+        $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.audience', 'm')
+            ->leftJoin('a.objectEntry', 'e')
+            ->leftJoin('a.objectEntryComment', 'ec')
+            ->leftJoin('a.objectPost', 'p')
+            ->leftJoin('a.objectPostComment', 'pc')
+            ->where('a.userActor = :user')
+            ->andWhere('a.type IN (:types)')
+            ->andWhere('a.objectMessage IS NULL') // chat messages are not public
+            ->andWhere('m IS NULL OR m.visibility = :visible')
+            ->andWhere('e IS NULL OR e.visibility = :visible')
+            ->andWhere('ec IS NULL OR ec.visibility = :visible')
+            ->andWhere('p IS NULL OR p.visibility = :visible')
+            ->andWhere('pc IS NULL OR pc.visibility = :visible')
+            ->setParameter('visible', VisibilityInterface::VISIBILITY_VISIBLE)
+            ->setParameter('user', $user)
+            ->setParameter('types', ['Create', 'Announce'])
+            ->orderBy('a.createdAt', 'DESC')
+            ->addOrderBy('a.uuid', 'DESC');
+
+        return new Pagerfanta(new QueryAdapter($qb));
     }
 
     public function createForRemotePayload(array $payload, ActivityPubActivityInterface|Entry|EntryComment|Post|PostComment|ActivityPubActorInterface|User|Magazine|Activity|array|string|null $object = null): Activity
@@ -115,7 +187,7 @@ class ActivityRepository extends ServiceEntityRepository
         return $activity;
     }
 
-    public function createForRemoteActivity(array $payload, ActivityPubActivityInterface|Entry|EntryComment|Post|PostComment|ActivityPubActorInterface|User|Magazine|Activity|array|string|null $object = null): Activity
+    public function createForRemoteActivity(array $payload, ActivityPubActivityInterface|Entry|EntryComment|Post|PostComment|ActivityPubActorInterface|User|Magazine|MagazineBan|Activity|array|string|null $object = null): Activity
     {
         if (isset($payload['@context'])) {
             unset($payload['@context']);

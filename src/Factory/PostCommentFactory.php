@@ -64,13 +64,14 @@ class PostCommentFactory
             $dto->editedAt,
             $dto->lastActive,
             bookmarks: $this->bookmarkListRepository->getBookmarksOfContentInterface($comment),
+            isAuthorModeratorInMagazine: $dto->magazine->userIsModerator($dto->user),
         );
     }
 
     public function createResponseTree(PostComment $comment, PostCommentPageView $criteria, int $depth, ?bool $canModerate = null): PostCommentResponseDto
     {
         $commentDto = $this->createDto($comment);
-        $toReturn = $this->createResponseDto($commentDto, $this->tagLinkRepository->getTagsOfPostComment($comment), array_reduce($comment->children->toArray(), PostCommentResponseDto::class.'::recursiveChildCount', 0));
+        $toReturn = $this->createResponseDto($commentDto, $this->tagLinkRepository->getTagsOfContent($comment), array_reduce($comment->children->toArray(), PostCommentResponseDto::class.'::recursiveChildCount', 0));
         $toReturn->isFavourited = $commentDto->isFavourited;
         $toReturn->userVote = $commentDto->userVote;
         $toReturn->canAuthUserModerate = $canModerate;
@@ -79,7 +80,7 @@ class PostCommentFactory
             return $toReturn;
         }
 
-        foreach ($comment->getChildrenByCriteria($criteria) as /** @var $childComment PostComment */ $childComment) {
+        foreach ($comment->getChildrenByCriteria($criteria) as /** @var PostComment $childComment */ $childComment) {
             \assert($childComment instanceof PostComment);
             if (($user = $this->security->getUser()) && $user instanceof User) {
                 if ($user->isBlocked($childComment->user)) {

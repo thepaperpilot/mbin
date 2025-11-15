@@ -81,6 +81,7 @@ class PostCommentResponseDto implements \JsonSerializable
     )]
     public array $children = [];
     public ?bool $canAuthUserModerate = null;
+    public ?bool $isAuthorModeratorInMagazine = null;
 
     /** @var string[]|null */
     #[OA\Property(type: 'array', items: new OA\Items(type: 'string'))]
@@ -112,6 +113,7 @@ class PostCommentResponseDto implements \JsonSerializable
         ?\DateTime $lastActive = null,
         ?bool $canAuthUserModerate = null,
         ?array $bookmarks = null,
+        ?bool $isAuthorModeratorInMagazine = null,
     ): self {
         $dto = new PostCommentResponseDto();
         $dto->commentId = $id;
@@ -137,6 +139,7 @@ class PostCommentResponseDto implements \JsonSerializable
         $dto->childCount = $childCount;
         $dto->canAuthUserModerate = $canAuthUserModerate;
         $dto->bookmarks = $bookmarks;
+        $dto->isAuthorModeratorInMagazine = $isAuthorModeratorInMagazine;
 
         return $dto;
     }
@@ -185,6 +188,7 @@ class PostCommentResponseDto implements \JsonSerializable
             'children' => $this->children,
             'canAuthUserModerate' => $this->canAuthUserModerate,
             'bookmarks' => $this->bookmarks,
+            'isAuthorModeratorInMagazine' => $this->isAuthorModeratorInMagazine,
         ]);
     }
 

@@ -429,6 +429,16 @@ class ActivityPubManager
                 $user->cover = null;
             }
 
+            if (isset($actor['publicKey']['publicKeyPem']) && $user->publicKey !== $actor['publicKey']['publicKeyPem']) {
+                if (null !== $user->publicKey) {
+                    // only log the message if there already was a public key. When initially created the actors do not get one
+                    $this->logger->info('The public key of user "{u}" has changed', ['u' => $user->username]);
+                    $user->lastKeyRotationDate = new \DateTime();
+                }
+                $user->oldPublicKey = $user->publicKey;
+                $user->publicKey = $actor['publicKey']['publicKeyPem'];
+            }
+
             if (null !== $user->apFollowersUrl) {
                 try {
                     $followersObj = $this->apHttpClient->getCollectionObject($user->apFollowersUrl);
@@ -595,6 +605,18 @@ class ActivityPubManager
                 $magazine->icon = null;
             }
 
+            if (isset($actor['image'])) {
+                $banner = !\array_key_exists('type', $actor['image']) ? $actor['image'] : [$actor['image']];
+                $newImage = $this->handleImages($banner);
+                if ($magazine->banner && $newImage !== $magazine->banner) {
+                    $this->bus->dispatch(new DeleteImageMessage($magazine->banner->getId()));
+                }
+                $magazine->banner = $newImage;
+            } elseif (null !== $magazine->banner) {
+                $this->bus->dispatch(new DeleteImageMessage($magazine->banner->getId()));
+                $magazine->banner = null;
+            }
+
             if ($actor['name']) {
                 $magazine->title = $actor['name'];
             } elseif ($actor['preferredUsername']) {
@@ -652,6 +674,16 @@ class ActivityPubManager
                     $this->handleMagazineFeaturedCollection($actorUrl, $magazine);
                 } catch (InvalidArgumentException $ignored) {
                 }
+            }
+
+            if (isset($actor['publicKey']['publicKeyPem']) && $magazine->publicKey !== $actor['publicKey']['publicKeyPem']) {
+                if (null !== $magazine->publicKey) {
+                    // only log the message if there already was a public key. When initially created the actors do not get one
+                    $this->logger->info('The public key of magazine "{m}" has changed', ['m' => $magazine->name]);
+                    $magazine->lastKeyRotationDate = new \DateTime();
+                }
+                $magazine->oldPublicKey = $magazine->publicKey;
+                $magazine->publicKey = $actor['publicKey']['publicKeyPem'];
             }
 
             if (null !== $magazine->apId) {

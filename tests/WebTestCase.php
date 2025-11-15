@@ -18,6 +18,8 @@ use App\Repository\BookmarkRepository;
 use App\Repository\EntryCommentRepository;
 use App\Repository\EntryRepository;
 use App\Repository\ImageRepository;
+use App\Repository\InstanceRepository;
+use App\Repository\MagazineBanRepository;
 use App\Repository\MagazineRepository;
 use App\Repository\MagazineSubscriptionRepository;
 use App\Repository\MessageRepository;
@@ -42,6 +44,7 @@ use App\Service\EntryCommentManager;
 use App\Service\EntryManager;
 use App\Service\FavouriteManager;
 use App\Service\ImageManager;
+use App\Service\InstanceManager;
 use App\Service\MagazineManager;
 use App\Service\MentionManager;
 use App\Service\MessageManager;
@@ -77,16 +80,16 @@ abstract class WebTestCase extends BaseWebTestCase
     protected const PAGINATION_KEYS = ['count', 'currentPage', 'maxPage', 'perPage'];
     protected const IMAGE_KEYS = ['filePath', 'sourceUrl', 'storageUrl', 'altText', 'width', 'height', 'blurHash'];
     protected const MESSAGE_RESPONSE_KEYS = ['messageId', 'threadId', 'sender', 'body', 'status', 'createdAt'];
-    protected const USER_RESPONSE_KEYS = ['userId', 'username', 'about', 'avatar', 'cover', 'createdAt', 'followersCount', 'apId', 'apProfileId', 'isBot', 'isFollowedByUser', 'isFollowerOfUser', 'isBlockedByUser', 'isAdmin', 'isGlobalModerator', 'serverSoftware', 'serverSoftwareVersion', 'notificationStatus'];
+    protected const USER_RESPONSE_KEYS = ['userId', 'username', 'about', 'avatar', 'cover', 'createdAt', 'followersCount', 'apId', 'apProfileId', 'isBot', 'isFollowedByUser', 'isFollowerOfUser', 'isBlockedByUser', 'isAdmin', 'isGlobalModerator', 'serverSoftware', 'serverSoftwareVersion', 'notificationStatus', 'reputationPoints'];
     protected const USER_SMALL_RESPONSE_KEYS = ['userId', 'username', 'isBot', 'isFollowedByUser', 'isFollowerOfUser', 'isBlockedByUser', 'avatar', 'apId', 'apProfileId', 'createdAt', 'isAdmin', 'isGlobalModerator'];
-    protected const ENTRY_RESPONSE_KEYS = ['entryId', 'magazine', 'user', 'domain', 'title', 'url', 'image', 'body', 'lang', 'tags', 'badges', 'numComments', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'isOc', 'isAdult', 'isPinned', 'createdAt', 'editedAt', 'lastActive', 'visibility', 'type', 'slug', 'apId', 'canAuthUserModerate', 'notificationStatus', 'bookmarks'];
-    protected const ENTRY_COMMENT_RESPONSE_KEYS = ['commentId', 'magazine', 'user', 'entryId', 'parentId', 'rootId', 'image', 'body', 'lang', 'isAdult', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'visibility', 'apId', 'mentions', 'tags', 'createdAt', 'editedAt', 'lastActive', 'childCount', 'children', 'canAuthUserModerate', 'bookmarks'];
-    protected const POST_RESPONSE_KEYS = ['postId', 'user', 'magazine', 'image', 'body', 'lang', 'isAdult', 'isPinned', 'comments', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'visibility', 'apId', 'tags', 'mentions', 'createdAt', 'editedAt', 'lastActive', 'slug', 'canAuthUserModerate', 'notificationStatus', 'bookmarks'];
-    protected const POST_COMMENT_RESPONSE_KEYS = ['commentId', 'user', 'magazine', 'postId', 'parentId', 'rootId', 'image', 'body', 'lang', 'isAdult', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'visibility', 'apId', 'mentions', 'tags', 'createdAt', 'editedAt', 'lastActive', 'childCount', 'children', 'canAuthUserModerate', 'bookmarks'];
+    protected const ENTRY_RESPONSE_KEYS = ['entryId', 'magazine', 'user', 'domain', 'title', 'url', 'image', 'body', 'lang', 'tags', 'badges', 'numComments', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'isOc', 'isAdult', 'isPinned', 'createdAt', 'editedAt', 'lastActive', 'visibility', 'type', 'slug', 'apId', 'canAuthUserModerate', 'notificationStatus', 'bookmarks', 'crosspostedEntries', 'isAuthorModeratorInMagazine'];
+    protected const ENTRY_COMMENT_RESPONSE_KEYS = ['commentId', 'magazine', 'user', 'entryId', 'parentId', 'rootId', 'image', 'body', 'lang', 'isAdult', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'visibility', 'apId', 'mentions', 'tags', 'createdAt', 'editedAt', 'lastActive', 'childCount', 'children', 'canAuthUserModerate', 'bookmarks', 'isAuthorModeratorInMagazine'];
+    protected const POST_RESPONSE_KEYS = ['postId', 'user', 'magazine', 'image', 'body', 'lang', 'isAdult', 'isPinned', 'comments', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'visibility', 'apId', 'tags', 'mentions', 'createdAt', 'editedAt', 'lastActive', 'slug', 'canAuthUserModerate', 'notificationStatus', 'bookmarks', 'isAuthorModeratorInMagazine'];
+    protected const POST_COMMENT_RESPONSE_KEYS = ['commentId', 'user', 'magazine', 'postId', 'parentId', 'rootId', 'image', 'body', 'lang', 'isAdult', 'uv', 'dv', 'favourites', 'isFavourited', 'userVote', 'visibility', 'apId', 'mentions', 'tags', 'createdAt', 'editedAt', 'lastActive', 'childCount', 'children', 'canAuthUserModerate', 'bookmarks', 'isAuthorModeratorInMagazine'];
     protected const BAN_RESPONSE_KEYS = ['banId', 'reason', 'expired', 'expiredAt', 'bannedUser', 'bannedBy', 'magazine'];
     protected const LOG_ENTRY_KEYS = ['type', 'createdAt', 'magazine', 'moderator', 'subject'];
-    protected const MAGAZINE_RESPONSE_KEYS = ['magazineId', 'owner', 'icon', 'name', 'title', 'description', 'rules', 'subscriptionsCount', 'entryCount', 'entryCommentCount', 'postCount', 'postCommentCount', 'isAdult', 'isUserSubscribed', 'isBlockedByUser', 'tags', 'badges', 'moderators', 'apId', 'apProfileId', 'serverSoftware', 'serverSoftwareVersion', 'isPostingRestrictedToMods', 'localSubscribers', 'notificationStatus'];
-    protected const MAGAZINE_SMALL_RESPONSE_KEYS = ['magazineId', 'name', 'icon', 'isUserSubscribed', 'isBlockedByUser', 'apId', 'apProfileId'];
+    protected const MAGAZINE_RESPONSE_KEYS = ['magazineId', 'owner', 'icon', 'banner', 'name', 'title', 'description', 'rules', 'subscriptionsCount', 'entryCount', 'entryCommentCount', 'postCount', 'postCommentCount', 'isAdult', 'isUserSubscribed', 'isBlockedByUser', 'tags', 'badges', 'moderators', 'apId', 'apProfileId', 'serverSoftware', 'serverSoftwareVersion', 'isPostingRestrictedToMods', 'localSubscribers', 'notificationStatus'];
+    protected const MAGAZINE_SMALL_RESPONSE_KEYS = ['magazineId', 'name', 'icon', 'banner', 'isUserSubscribed', 'isBlockedByUser', 'apId', 'apProfileId'];
     protected const DOMAIN_RESPONSE_KEYS = ['domainId', 'name', 'entryCount', 'subscriptionsCount', 'isUserSubscribed', 'isBlockedByUser'];
 
     protected const KIBBY_PNG_URL_RESULT = 'a8/1c/a81cc2fea35eeb232cd28fcb109b3eb5a4e52c71bce95af6650d71876c1bcbb7.png';
@@ -117,6 +120,7 @@ abstract class WebTestCase extends BaseWebTestCase
     protected ActivityPubManager $activityPubManager;
     protected BookmarkManager $bookmarkManager;
     protected MarkdownConverter $markdownConverter;
+    protected InstanceManager $instanceManager;
 
     protected MagazineRepository $magazineRepository;
     protected EntryRepository $entryRepository;
@@ -136,6 +140,8 @@ abstract class WebTestCase extends BaseWebTestCase
     protected UserFollowRepository $userFollowRepository;
     protected MagazineSubscriptionRepository $magazineSubscriptionRepository;
     protected ActivityRepository $activityRepository;
+    protected InstanceRepository $instanceRepository;
+    protected MagazineBanRepository $magazineBanRepository;
 
     protected ImageFactory $imageFactory;
     protected MagazineFactory $magazineFactory;
@@ -192,7 +198,9 @@ abstract class WebTestCase extends BaseWebTestCase
         $this->activityPubManager = $this->getService(ActivityPubManager::class);
         $this->bookmarkManager = $this->getService(BookmarkManager::class);
         $this->markdownConverter = $this->getService(MarkdownConverter::class);
+        $this->instanceManager = $this->getService(InstanceManager::class);
         $this->activityJsonBuilder = $this->getService(ActivityJsonBuilder::class);
+        $this->mentionManager = $this->getService(MentionManager::class);
 
         $this->magazineRepository = $this->getService(MagazineRepository::class);
         $this->entryRepository = $this->getService(EntryRepository::class);
@@ -212,6 +220,8 @@ abstract class WebTestCase extends BaseWebTestCase
         $this->userFollowRepository = $this->getService(UserFollowRepository::class);
         $this->magazineSubscriptionRepository = $this->getService(MagazineSubscriptionRepository::class);
         $this->activityRepository = $this->getService(ActivityRepository::class);
+        $this->instanceRepository = $this->getService(InstanceRepository::class);
+        $this->magazineBanRepository = $this->getService(MagazineBanRepository::class);
 
         $this->imageFactory = $this->getService(ImageFactory::class);
         $this->personFactory = $this->getService(PersonFactory::class);

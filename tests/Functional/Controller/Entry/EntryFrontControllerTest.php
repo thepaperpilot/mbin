@@ -24,8 +24,6 @@ class EntryFrontControllerTest extends WebTestCase
         $this->assertSelectorTextContains('.entry__meta', 'JohnDoe');
         $this->assertSelectorTextContains('.entry__meta', 'to acme');
 
-        $this->assertSelectorTextContains('#header .active', 'Threads');
-
         $this->assertcount(2, $crawler->filter('.entry'));
 
         foreach ($this->getSortOptions() as $sortOption) {
@@ -71,8 +69,6 @@ class EntryFrontControllerTest extends WebTestCase
 
         $this->assertSelectorTextContains('.entry__meta', 'JohnDoe');
         $this->assertSelectorTextContains('.entry__meta', 'to acme');
-
-        $this->assertSelectorTextContains('#header .active', 'Threads');
 
         $this->assertcount(2, $crawler->filter('.entry'));
 
@@ -342,6 +338,8 @@ class EntryFrontControllerTest extends WebTestCase
             $this->getUserByUsername('JaneDoe')
         );
 
+        // this  is necessary so the second entry is guaranteed to be newer than the first
+        sleep(1);
         $this->getEntryByTitle('test entry 2', 'https://kbin.pub');
 
         return $this->client;

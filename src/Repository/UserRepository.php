@@ -78,11 +78,6 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
             ->getOneOrNullResult();
     }
 
-    public function countPublicActivity(User $user, bool $hideAdult): int
-    {
-        return $this->getPublicActivityQuery($user, $hideAdult)->rowCount();
-    }
-
     private function getPublicActivityQuery(User $user, bool $hideAdult): Result
     {
         $falseCond = $user->isDeleted ? ' AND FALSE ' : '';
@@ -112,6 +107,9 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $stmt->executeQuery();
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function findPublicActivity(int $page, User $user, bool $hideAdult): PagerfantaInterface
     {
         // @todo union adapter
@@ -565,6 +563,9 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
             ->getResult();
     }
 
+    /**
+     * @return User[]
+     */
     public function findUsersSuggestions(string $query): array
     {
         $qb = $this->createQueryBuilder('u');

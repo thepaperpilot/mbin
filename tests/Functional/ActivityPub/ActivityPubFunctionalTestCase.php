@@ -38,6 +38,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
     protected User $remoteSubscriber;
     protected ?string $prev;
 
+    protected string $localDomain;
     protected string $remoteDomain = 'remote.mbin';
     protected string $remoteSubDomain = 'remote.sub.mbin';
 
@@ -46,7 +47,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
     public function setUp(): void
     {
         parent::setUp();
-
+        $this->localDomain = $this->settingsManager->get('KBIN_DOMAIN');
         $this->setupLocalActors();
 
         $this->switchToRemoteDomain($this->remoteSubDomain);
@@ -86,8 +87,11 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
         $this->entityManager->clear();
 
         $this->remoteSubscriber = $this->activityPubManager->findActorOrCreate("@remoteSubscriber@$this->remoteSubDomain");
+        $this->remoteSubscriber->publicKey = 'some public key';
         $this->remoteMagazine = $this->activityPubManager->findActorOrCreate("!remoteMagazine@$this->remoteDomain");
+        $this->remoteMagazine->publicKey = 'some public key';
         $this->remoteUser = $this->activityPubManager->findActorOrCreate("@remoteUser@$this->remoteDomain");
+        $this->remoteUser->publicKey = 'some public key';
         $this->localMagazine = $this->magazineRepository->findOneByName('magazine');
         $this->magazineManager->subscribe($this->localMagazine, $this->remoteSubscriber);
         self::assertTrue($this->localMagazine->isSubscribed($this->remoteSubscriber));
@@ -189,7 +193,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
     protected function createRemoteEntryInRemoteMagazine(Magazine $magazine, User $user, ?callable $entryCreateCallback = null): array
     {
         $entry = $this->getEntryByTitle('remote entry', magazine: $magazine, user: $user);
-        $json = $this->pageFactory->create($entry, $this->tagLinkRepository->getTagsOfEntry($entry));
+        $json = $this->pageFactory->create($entry, $this->tagLinkRepository->getTagsOfContent($entry));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($entry);
@@ -219,7 +223,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
         $entries = array_filter($this->entitiesToRemoveAfterSetup, fn ($item) => $item instanceof Entry);
         $entry = $entries[array_key_first($entries)];
         $comment = $this->createEntryComment('remote entry comment', $entry, $user);
-        $json = $this->entryCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfEntryComment($comment));
+        $json = $this->entryCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfContent($comment));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($comment);
@@ -247,7 +251,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
     protected function createRemotePostInRemoteMagazine(Magazine $magazine, User $user, ?callable $postCreateCallback = null): array
     {
         $post = $this->createPost('remote post', magazine: $magazine, user: $user);
-        $json = $this->postNoteFactory->create($post, $this->tagLinkRepository->getTagsOfPost($post));
+        $json = $this->postNoteFactory->create($post, $this->tagLinkRepository->getTagsOfContent($post));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($post);
@@ -277,7 +281,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
         $posts = array_filter($this->entitiesToRemoveAfterSetup, fn ($item) => $item instanceof Post);
         $post = $posts[array_key_first($posts)];
         $comment = $this->createPostComment('remote post comment', $post, $user);
-        $json = $this->postCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfPostComment($comment));
+        $json = $this->postCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfContent($comment));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($comment);
@@ -305,7 +309,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
     protected function createRemoteEntryInLocalMagazine(Magazine $magazine, User $user, ?callable $entryCreateCallback = null): array
     {
         $entry = $this->getEntryByTitle('remote entry in local', magazine: $magazine, user: $user);
-        $json = $this->pageFactory->create($entry, $this->tagLinkRepository->getTagsOfEntry($entry));
+        $json = $this->pageFactory->create($entry, $this->tagLinkRepository->getTagsOfContent($entry));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($entry);
@@ -332,7 +336,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
         $entries = array_filter($this->entitiesToRemoveAfterSetup, fn ($item) => $item instanceof Entry && 'remote entry in local' === $item->title);
         $entry = $entries[array_key_first($entries)];
         $comment = $this->createEntryComment('remote entry comment', $entry, $user);
-        $json = $this->entryCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfEntryComment($comment));
+        $json = $this->entryCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfContent($comment));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($comment);
@@ -357,7 +361,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
     protected function createRemotePostInLocalMagazine(Magazine $magazine, User $user, ?callable $postCreateCallback = null): array
     {
         $post = $this->createPost('remote post in local', magazine: $magazine, user: $user);
-        $json = $this->postNoteFactory->create($post, $this->tagLinkRepository->getTagsOfPost($post));
+        $json = $this->postNoteFactory->create($post, $this->tagLinkRepository->getTagsOfContent($post));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($post);
@@ -384,7 +388,7 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
         $posts = array_filter($this->entitiesToRemoveAfterSetup, fn ($item) => $item instanceof Post && 'remote post in local' === $item->body);
         $post = $posts[array_key_first($posts)];
         $comment = $this->createPostComment('remote post comment in local', $post, $user);
-        $json = $this->postCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfPostComment($comment));
+        $json = $this->postCommentNoteFactory->create($comment, $this->tagLinkRepository->getTagsOfContent($comment));
         $this->testingApHttpClient->activityObjects[$json['id']] = $json;
 
         $createActivity = $this->createWrapper->build($comment);
@@ -464,13 +468,18 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
         $this->assertCount($expectedCount, $activities);
     }
 
-    protected function assertOneSentActivityOfType(string $type, ?string $activityId = null): void
+    protected function assertOneSentActivityOfType(string $type, ?string $activityId = null, ?string $inboxUrl = null): array
     {
         $activities = $this->getSentActivitiesOfType($type);
         self::assertCount(1, $activities);
         if (null !== $activityId) {
             self::assertEquals($activityId, $activities[0]['payload']['id']);
         }
+        if (null !== $inboxUrl) {
+            self::assertEquals($inboxUrl, $activities[0]['inboxUrl']);
+        }
+
+        return $activities[0]['payload'];
     }
 
     protected function assertOneSentAnnouncedActivityOfType(string $type, ?string $announcedActivityId = null): void
@@ -480,6 +489,23 @@ abstract class ActivityPubFunctionalTestCase extends ActivityPubTestCase
         if (null !== $announcedActivityId) {
             self::assertEquals($announcedActivityId, $activities[0]['payload']['object']['id']);
         }
+    }
+
+    protected function assertOneSentAnnouncedActivityOfTypeGetInnerActivity(string $type, ?string $announcedActivityId = null, ?string $announceId = null, ?string $inboxUrl = null): array|string
+    {
+        $activities = $this->getSentAnnounceActivitiesOfInnerType($type);
+        self::assertCount(1, $activities);
+        if (null !== $announcedActivityId) {
+            self::assertEquals($announcedActivityId, $activities[0]['payload']['object']['id']);
+        }
+        if (null !== $announceId) {
+            self::assertEquals($announceId, $activities[0]['payload']['id']);
+        }
+        if (null !== $inboxUrl) {
+            self::assertEquals($inboxUrl, $activities[0]['inboxUrl']);
+        }
+
+        return $activities[0]['payload']['object'];
     }
 
     /**

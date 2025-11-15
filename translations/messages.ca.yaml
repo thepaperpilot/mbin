@@ -79,7 +79,7 @@ enabled: Habilitat
 followers: Seguidor(e)s
 reset_check_email_desc: Si ja hi ha un compte associat a la vostra adreça 
   electrònica, rebreu un correu electrònic en breu amb un enllaç que podeu 
-  utilitzar per restablir la vostra contrasenya. Aquest enllaç caducarà a 
+  utilitzar per restablir la vostra contrasenya. Aquest enllaç caducarà en 
   %expire%.
 email_confirm_expire: Tingueu en compte que l'enllaç caducarà d'aquí a una hora.
 moderated: Moderat(da)
@@ -256,9 +256,9 @@ restored_thread_by: ha restaurat un fil de
 restored_comment_by: ha restaurat el comentari de
 removed_post_by: ha eliminat una publicació de
 restored_post_by: ha restaurat una publicació de
-he_banned: bandejar
-he_unbanned: desbandejar
-read_all: Llegir-ho tot
+he_banned: bandejat(da)
+he_unbanned: desbandejat(da)
+read_all: Marcar-ho tot com a llegit
 show_all: Mostrar-ho tot
 flash_thread_edit_success: El fil s'ha editat correctament.
 flash_magazine_edit_success: La revista ha estat editada amb èxit.
@@ -308,7 +308,7 @@ mentioned_you: Us ha esmentat
 comment: Comentari
 post: Publicació
 ban_expired: El bandeig ha expirat
-purge: Purgar
+purge: Buidar la llista
 send_message: Enviar missatge directe
 sticky_navbar: Barra de navegació fixa
 subject_reported: S'ha denunciat el contingut.
@@ -672,8 +672,7 @@ update_comment: Actualitzar comentari
 show_avatars_on_comments_help: Mostrar/amagar els avatars quan es veuen 
   comentaris en un sol fil o publicació.
 comment_reply_position: Posició del comentari de resposta
-magazine_theme_appearance_icon: Icona personalitzada per a la revista. Si no 
-  se'n selecciona cap, s'utilitzarà la icona predeterminada.
+magazine_theme_appearance_icon: Icona personalitzada per a la revista.
 magazine_theme_appearance_background_image: Imatge de fons personalitzada que 
   s'aplicarà quan visualitzeu contingut a la vostra revista.
 moderation.report.approve_report_title: Aprovar la denúncia
@@ -1104,3 +1103,30 @@ search_type_actors: Revistes i comptes
 search_type_content: Temes i microblogs
 type_search_magazine: Limitar la cerca a la revista...
 type_search_user: Limitar la cerca a l'autoria...
+modlog_type_entry_deleted: Fil suprimit
+modlog_type_entry_restored: Fil restaurat
+modlog_type_entry_comment_deleted: Comentari del fil suprimit
+modlog_type_entry_comment_restored: Comentari del fil restaurat
+modlog_type_entry_pinned: Fil fixat
+modlog_type_entry_unpinned: Fil deixat de fixar
+modlog_type_post_deleted: Microblog suprimit
+modlog_type_post_restored: Microblog restaurat
+modlog_type_post_comment_deleted: Resposta del microblog suprimida
+modlog_type_post_comment_restored: Resposta del microblog restaurada
+modlog_type_ban: Compte expulsat de la revista
+modlog_type_moderator_add: Moderador(a) de la revista afegit(da)
+modlog_type_moderator_remove: Moderador(a) de la revista destituït(da)
+everyone: Tothom
+nobody: Ningú
+followers_only: Només seguidor(e)s
+direct_message_setting_label: Qui pot enviar un missatge directe
+banner: Bàner
+magazine_theme_appearance_banner: Bàner personalitzat per a la revista. Es 
+  mostra a sobre de tots els fils de discussió i ha de tenir una relació 
+  d'aspecte ampla (5:1 o 1500 px * 300 px).
+delete_magazine_icon: Icona de suprimir revista
+flash_magazine_theme_icon_detached_success: La icona de la revista s'ha suprimit
+  correctament
+delete_magazine_banner: Suprimir el bàner de la revista
+flash_magazine_theme_banner_detached_success: El bàner de la revista s'ha 
+  suprimit correctament
