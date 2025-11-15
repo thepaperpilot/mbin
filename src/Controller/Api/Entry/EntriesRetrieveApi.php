@@ -298,8 +298,6 @@ class EntriesRetrieveApi extends EntriesBaseApi
         #[MapQueryParameter] ?string $time,
         #[MapQueryParameter] ?string $federation,
     ): JsonResponse {
-        $headers = $this->rateLimit($apiReadLimiter);
-
         $criteria = new EntryPageView($p ?? 1, $security);
         $criteria->sortOption = $sort ?? Criteria::SORT_HOT;
         $criteria->time = $criteria->resolveTime($time ?? Criteria::TIME_ALL);
@@ -327,8 +325,7 @@ class EntriesRetrieveApi extends EntriesBaseApi
         }
 
         return new JsonResponse(
-            $this->serializePaginated($dtos, $entries),
-            headers: $headers
+            $this->serializePaginated($dtos, $entries)
         );
     }
 
