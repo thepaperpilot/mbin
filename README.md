@@ -196,26 +196,19 @@ Unofficial magazines:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/Ahrotahn">
-                    <img src="https://avatars.githubusercontent.com/u/40727284?v=4" width="100;" alt="Ahrotahn"/>
+                <a href="https://github.com/GauthierPLM">
+                    <img src="https://avatars.githubusercontent.com/u/2579741?v=4" width="100;" alt="GauthierPLM"/>
                     <br />
-                    <sub><b>Ahrotahn</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/CocoPoops">
-                    <img src="https://avatars.githubusercontent.com/u/7891055?v=4" width="100;" alt="CocoPoops"/>
-                    <br />
-                    <sub><b>CocoPoops</b></sub>
+                    <sub><b>Gauthier POGAM--LE MONTAGNER</b></sub>
                 </a>
             </td>
 		</tr>
 		<tr>
             <td align="center">
-                <a href="https://github.com/thepaperpilot">
-                    <img src="https://avatars.githubusercontent.com/u/3683148?v=4" width="100;" alt="thepaperpilot"/>
+                <a href="https://github.com/CocoPoops">
+                    <img src="https://avatars.githubusercontent.com/u/7891055?v=4" width="100;" alt="CocoPoops"/>
                     <br />
-                    <sub><b>Anthony Lawn</b></sub>
+                    <sub><b>CocoPoops</b></sub>
                 </a>
             </td>
             <td align="center">
